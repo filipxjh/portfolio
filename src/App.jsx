@@ -126,21 +126,25 @@ function useInView(threshold = 0.15) {
 
 // ── XJH LOGO ──────────────────────────────────────────────────────────────────
 
-function XJHLogo({ size = 36 }) {
+function KusnirLogo({ dark = true }) {
+  const color = dark ? "#1a1a1a" : "#fcfaf7";
   return (
-    <svg width={size} height={size} viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="36" height="36" fill="#1a1a1a"/>
-      {/* X */}
-      <line x1="5" y1="8"  x2="13" y2="20" stroke="#1d4ed8" strokeWidth="2.2" strokeLinecap="round"/>
-      <line x1="13" y1="8" x2="5"  y2="20" stroke="#1d4ed8" strokeWidth="2.2" strokeLinecap="round"/>
-      {/* J */}
-      <line x1="17.5" y1="8" x2="17.5" y2="20" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round"/>
-      <path d="M14.5 17 Q14.5 22 18 22 Q21.5 22 21.5 18" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" fill="none"/>
-      {/* H */}
-      <line x1="24" y1="8"  x2="24" y2="22" stroke="#7c3aed" strokeWidth="2.2" strokeLinecap="round"/>
-      <line x1="30" y1="8"  x2="30" y2="22" stroke="#7c3aed" strokeWidth="2.2" strokeLinecap="round"/>
-      <line x1="24" y1="15" x2="30" y2="15" stroke="#7c3aed" strokeWidth="2.2" strokeLinecap="round"/>
-    </svg>
+    <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
+      <span style={{
+        fontFamily: "'Montserrat', sans-serif",
+        fontWeight: 900,
+        fontSize: 15,
+        letterSpacing: 3,
+        textTransform: "uppercase",
+        color: color,
+        lineHeight: 1,
+      }}>Kušnír</span>
+      <span style={{
+        width: 5, height: 5, borderRadius: "50%",
+        background: "linear-gradient(135deg, #1d4ed8, #6d28d9)",
+        flexShrink: 0, marginBottom: 1,
+      }} />
+    </div>
   );
 }
 
@@ -168,20 +172,21 @@ function Nav({ active, setActive }) {
       <nav style={{
         position: "fixed", top: 0, left: 0, right: 0, zIndex: 200,
         height: 60, display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "0 5vw",
+        padding: "0 5vw", position: "fixed",
         background: scrolled ? "rgba(252,250,247,0.96)" : "transparent",
         backdropFilter: scrolled ? "blur(12px)" : "none",
         borderBottom: scrolled ? "1px solid rgba(0,0,0,0.06)" : "none",
         transition: "all 0.3s ease",
       }}>
-        <a href="#about" onClick={() => handleLink("about")} style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 10 }}>
-          <XJHLogo size={34} />
-          <span style={{ color: "#1a1a1a", fontWeight: 600, fontSize: 14, letterSpacing: 0.2 }}>Filip Kušnír</span>
+        {/* Logo left */}
+        <a href="#about" onClick={() => handleLink("about")} style={{ textDecoration: "none", display: "flex", alignItems: "center", minWidth: 100 }}>
+          <KusnirLogo dark={true} />
         </a>
-        <div className="nav-desktop" style={{ display: "flex", gap: 2 }}>
+        {/* Nav center */}
+        <div className="nav-desktop" style={{ display: "flex", gap: 2, position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
           {NAV_LINKS.map(l => (
             <a key={l.href} href={`#${l.href}`} onClick={() => handleLink(l.href)}
-              style={{ padding: "6px 14px", fontSize: 13.5, textDecoration: "none", color: active === l.href ? "#1a1a1a" : "#888", fontWeight: active === l.href ? 600 : 400, borderBottom: active === l.href ? "1.5px solid #1a1a1a" : "1.5px solid transparent", transition: "all 0.15s" }}
+              style={{ padding: "6px 14px", fontSize: 13, textDecoration: "none", color: active === l.href ? "#1a1a1a" : "#888", fontWeight: active === l.href ? 600 : 400, borderBottom: active === l.href ? "1.5px solid #1a1a1a" : "1.5px solid transparent", transition: "all 0.15s", whiteSpace: "nowrap" }}
               onMouseEnter={e => { if (active !== l.href) e.currentTarget.style.color = "#1a1a1a"; }}
               onMouseLeave={e => { if (active !== l.href) e.currentTarget.style.color = "#888"; }}
             >{l.label}</a>
@@ -230,12 +235,12 @@ function Hero() {
   useEffect(() => { setTimeout(() => setMounted(true), 80); }, []);
   return (
     <section id="about" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 5vw", background: "#fcfaf7", position: "relative", overflow: "hidden" }}>
-      {/* Grid */}
-      <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(0,0,0,0.032) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.032) 1px, transparent 1px)", backgroundSize: "80px 80px", pointerEvents: "none" }} />
-      {/* Gradient blobs */}
-      <div style={{ position: "absolute", top: "10%", right: "-5%", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(29,78,216,0.1) 0%, transparent 70%)", pointerEvents: "none" }} />
-      <div style={{ position: "absolute", bottom: "5%", left: "-8%", width: 600, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(67,56,202,0.08) 0%, transparent 70%)", pointerEvents: "none" }} />
-      <div style={{ position: "absolute", top: "50%", left: "55%", width: 300, height: 300, borderRadius: "50%", background: "radial-gradient(circle, rgba(109,40,217,0.07) 0%, transparent 70%)", pointerEvents: "none" }} />
+      {/* Grain texture overlay */}
+      <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 2, opacity: 0.55, backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23grain)' opacity='0.25'/%3E%3C/svg%3E")`, backgroundRepeat: "repeat" }} />
+      {/* Subtle animated gradient blobs */}
+      <div style={{ position: "absolute", top: "15%", right: "5%", width: 420, height: 420, borderRadius: "50%", background: "radial-gradient(circle, rgba(29,78,216,0.09) 0%, transparent 70%)", pointerEvents: "none", animation: "blobFloat 8s ease-in-out infinite" }} />
+      <div style={{ position: "absolute", bottom: "10%", left: "0%", width: 500, height: 360, borderRadius: "50%", background: "radial-gradient(circle, rgba(109,40,217,0.07) 0%, transparent 70%)", pointerEvents: "none", animation: "blobFloat 11s ease-in-out infinite reverse" }} />
+      <div style={{ position: "absolute", top: "55%", left: "40%", width: 280, height: 280, borderRadius: "50%", background: "radial-gradient(circle, rgba(67,56,202,0.06) 0%, transparent 70%)", pointerEvents: "none", animation: "blobFloat 14s ease-in-out infinite 2s" }} />
 
       <div style={{ maxWidth: 900, margin: "0 auto", paddingTop: 80, width: "100%", position: "relative", transition: "opacity 0.9s, transform 0.9s", opacity: mounted ? 1 : 0, transform: mounted ? "none" : "translateY(24px)" }}>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 14px", border: "1px solid rgba(0,0,0,0.08)", marginBottom: 40, background: "#fff" }}>
@@ -569,6 +574,7 @@ export default function App() {
         @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
         @keyframes spin { to{transform:rotate(360deg)} }
         @keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+        @keyframes blobFloat { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(20px,-15px) scale(1.04)} 66%{transform:translate(-10px,20px) scale(0.97)} }
 
         @media (max-width: 768px) {
           .nav-desktop { display: none !important; }
@@ -593,7 +599,7 @@ export default function App() {
       <ContactSection />
       <footer style={{ borderTop: "1px solid rgba(255,255,255,0.06)", padding: "20px 5vw", display: "flex", justifyContent: "space-between", alignItems: "center", background: "#1a1a1a", flexWrap: "wrap", gap: 8 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <XJHLogo size={24} />
+          <KusnirLogo dark={false} />
           <span style={{ color: "#444", fontSize: 12, fontFamily: "'DM Mono', monospace" }}>© 2026 Filip Kušnír</span>
         </div>
         <span style={{ color: "#444", fontSize: 12, fontFamily: "'DM Mono', monospace" }}>Digital Marketing & Analytics</span>
