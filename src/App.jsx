@@ -9,8 +9,8 @@ const NAV_LINKS = [
 ];
 
 const SKILLS = [
-  { category: "Analytics & Data",       items: ["Google Analytics 4", "Looker Studio", "GTM", "SQL", "Excel / Sheets"],            bg: "#eff6ff", accent: "#1d4ed8", border: "#bfdbfe" },
-  { category: "Performance Marketing",  items: ["Google Ads", "Meta Ads", "Inbound Marketing", "UTM Tracking", "PPC"],             bg: "#eef2ff", accent: "#4338ca", border: "#c7d2fe" },
+  { category: "Analytics & Data",       items: ["Google Analytics 4", "Looker Studio", "SQL", "Excel / Sheets"],            bg: "#eff6ff", accent: "#1d4ed8", border: "#bfdbfe" },
+  { category: "Performance Marketing",  items: ["Google Ads", "Meta Ads", "Inbound Marketing", "PPC"],             bg: "#eef2ff", accent: "#4338ca", border: "#c7d2fe" },
   { category: "Tools & Platforms",      items: ["HubSpot", "AI nástroje", "Databázové systémy", "REST API", "Git"],                bg: "#f5f3ff", accent: "#6d28d9", border: "#ddd6fe" },
   { category: "Web Development",        items: ["JavaScript", "HTML / CSS", "React", "Node.js", "Vite"],                           bg: "#faf5ff", accent: "#7c3aed", border: "#e9d5ff" },
 ];
@@ -47,7 +47,7 @@ const EXPERIENCE = [
     company: "Ľudovít Nastišin (SZČO)",
     location: "Prešov",
     role: "Digitálny dizajn & marketingová komunikácia",
-    period: "11/2024 — 02/2025",
+    period: "11/2024 - 02/2025",
     points: [
       "Tvorba vizuálnych podkladov pre online komunikáciu klienta",
       "Príprava grafických materiálov pre digitálne kampane",
@@ -57,9 +57,9 @@ const EXPERIENCE = [
 ];
 
 const EDUCATION = [
-  { school: "Univerzita Komenského, Bratislava", degree: "Mgr.", field: "Digitálny manažment a online marketing", period: "2025 — súčasnosť" },
-  { school: "Prešovská univerzita",              degree: "Bc.",  field: "Obchodný manažment a marketing",         period: "2022 — 2025" },
-  { school: "SPŠE Prešov",                       degree: "Maturita", field: "Informačné a sieťové technológie",  period: "2018 — 2022" },
+  { school: "Univerzita Komenského, Bratislava", degree: "Mgr.", field: "Digitálny manažment a online marketing", period: "2025 - súčasnosť" },
+  { school: "Prešovská univerzita",              degree: "Bc.",  field: "Obchodný manažment a marketing",         period: "2022 - 2025" },
+  { school: "SPŠE Prešov",                       degree: "Maturita", field: "Informačné a sieťové technológie",  period: "2018 - 2022" },
 ];
 
 const CASE_STUDIES = [
@@ -68,12 +68,12 @@ const CASE_STUDIES = [
     index: "01",
     color: "#1d4ed8",
     colorLight: "#eef2ff",
-    title: "GA4 Demo Account — Analýza akvizície",
+    title: "GA4 Demo Account - Analýza akvizície",
     subtitle: "Google Merchandise Store · Dec 2025 – Mar 2026",
-    context: "Použil som verejne dostupný GA4 Demo Account od Google (Property ID: 213025502) ako reálny dátový zdroj. Cieľom bolo prejsť celý analytický proces — od zberu dát cez interpretáciu až po vizualizáciu — rovnako ako by som to robil pri skutočnom klientovi.",
+    context: "Použitý dostupný GA4 Demo Account od Google ako reálny dátový zdroj. Cieľom bolo prejsť celý analytický proces od zberu dát cez interpretáciu až po vizualizáciu.",
     what: [
       "Preskúmal som 90-dňové dáta: 226 418 relácií, 164 579 aktívnych používateľov",
-      "Identifikoval som dominantný kanál — Direct traffic tvorí 47.9 % všetkých relácií",
+      "Identifikoval som dominantný kanál, Direct traffic tvorí 47.9 % všetkých relácií",
       "Porovnal mieru interakcie naprieč kanálmi (Cross-network 79.5 % vs. Direct 34.6 %)",
       "Navrhol custom Chart.js dashboard s animovanými KPI pre rýchlu orientáciu",
     ],
@@ -83,21 +83,21 @@ const CASE_STUDIES = [
       { label: "Direct podiel", value: "47.9 %" },
       { label: "Organic Search", value: "22.4 %" },
     ],
-    takeaway: "Dominancia Direct trafficu pri nízkej miere interakcie (34.6 %) naznačuje, že značná časť návštevníkov prichádza bez jasného zámeru — priestor pre lepší remarketing a obsahovú stratégiu.",
+    takeaway: "Dominancia Direct trafficu pri nízkej miere interakcie (34.6 %) naznačuje, že značná časť návštevníkov prichádza bez jasného zámeru, priestor pre lepší remarketing a obsahovú stratégiu.",
   },
   {
     id: "dnd",
     index: "02",
     color: "#4338ca",
     colorLight: "#eef2ff",
-    title: "Build Editor — od API po funkčný produkt",
+    title: "Build Editor - od API po funkčný produkt",
     subtitle: "Dark & Darker · Full-Stack projekt",
     context: "Začal som s jednoduchým nápadom: vytvoriť nástroj pre hráčov, ktorý im pomôže plánovať herné zostavy. Projekt prerástol do full-stack aplikácie s externým API, serverless proxy a vlastným dizajnom.",
     what: [
       "Analyzoval som DarkerDB API dokumentáciu a pochopil bitmask systém pre filtrovanie tried",
       "Vytvoril Vercel serverless proxy (/api/items.js) na obídenie CORS obmedzení externého API",
       "Implementoval dynamický výpočet 20+ herných štatistík podľa reálnych vzorcov z hry",
-      "Navrhol UI v metalickom štýle — cut-corner elementy, tmavá paleta, grain textúra",
+      "Navrhol UI v metalickom štýle - cut-corner elementy, tmavá paleta, grain textúra",
     ],
     findings: [
       { label: "API endpoint",  value: "DarkerDB v1" },
@@ -105,7 +105,7 @@ const CASE_STUDIES = [
       { label: "Herné triedy", value: "10" },
       { label: "Ukladanie",    value: "localStorage" },
     ],
-    takeaway: "Hlavná technická výzva bola CORS — vyriešil som ju Vercel serverless funkciou ktorá proxy-uje requesty na externé API. Projekt ukázal, že aj fanúšikovský projekt môže mať produkčnú kvalitu.",
+    takeaway: "Hlavná technická výzva bola CORS - vyriešil som ju Vercel serverless funkciou ktorá proxy-uje requesty na externé API. Projekt ukázal, že aj fanúšikovský projekt môže mať produkčnú kvalitu.",
   },
 ];
 
