@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dark and Darker Build Editor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: 'Cinzel', serif;
+      background-color: #0d0d0d;
+      color: #888;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* NAV */
+    nav {
+      background-color: #121212;
+      padding: 15px;
+      text-align: center;
+      border-bottom: 2px solid #555;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    nav ul {
+      list-style: none;
+      padding: 0; margin: 0;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    nav ul li a {
+      color: #bbb;
+      text-decoration: none;
+      font-size: clamp(0.85rem, 2vw, 1.2rem);
+      padding: 4px 8px;
+    }
+    nav ul li a:hover { color: #ff9900; }
+
+    /* CLASS SECTION */
+    #class-section {
+      position: relative;
+      padding: 40px 20px 80px;
+      text-align: center;
+    }
+    #class-section::before {
+      content: "";
+      position: absolute; inset: 0;
+      background: url('images/bg1.webp') no-repeat center center / cover;
+      opacity: 0.25;
+      z-index: -1;
+    }
+    #class-section::after {
+      content: "";
+      position: absolute;
+      bottom: -2.5px; left: 20%; right: 20%;
+      height: 5px;
+      background: linear-gradient(to right, rgb(68,48,5), rgba(255,153,0,0.5), rgb(68,48,5));
+      border-radius: 5px;
+    }
+
+    #class-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    #class-buttons button {
+      background-color: #1a1a1a;
+      color: #ccc;
+      border: 1px solid #555;
+      padding: 8px 14px;
+      cursor: pointer;
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.75rem, 1.5vw, 1rem);
+      transition: background 0.2s;
+    }
+    #class-buttons button:hover { background-color: #252525; color: #ff9900; }
+
+    #class-portrait {
+      width: min(300px, 80vw);
+      height: auto;
+      display: block;
+      margin: 0 auto;
+      object-fit: contain;
+    }
+
+    /* MAIN LAYOUT */
+    main {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 24px;
+      padding: 40px 20px;
+      position: relative;
+      background: url('images/bg3.webp') no-repeat center center / cover;
+    }
+    main::after {
+      content: "";
+      position: absolute;
+      bottom: -2.5px; left: 20%; right: 20%;
+      height: 5px;
+      background: linear-gradient(to right, rgb(68,48,5), rgba(255,153,0,0.5), rgb(68,48,5));
+      border-radius: 5px;
+    }
+
+    /* STATS */
+    #character-section {
+      flex: 1 1 280px;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+    #stat-container {
+      background: rgba(20,20,20,0.92);
+      padding: 16px;
+      border: 2px solid #555;
+      width: 100%;
+    }
+    #stat-container h2 { margin-top: 0; color: #ff9900; font-size: 1.1rem; }
+    #stat-table { width: 100%; border-collapse: collapse; font-size: clamp(0.75rem, 1.5vw, 0.95rem); }
+    #stat-table td { padding: 4px 8px; border-bottom: 1px solid #333; }
+    #stat-table td:first-child { color: #aaa; }
+    #stat-table td:last-child { color: #fff; text-align: right; }
+
+    /* GEAR GRID */
+    #gear-selection {
+      flex: 1 1 300px;
+      max-width: 580px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 20px 0;
+    }
+    #svg-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 560px;
+    }
+    #svg-wrapper svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .gear-slot2 { cursor: pointer; transition: opacity 0.2s; }
+    .gear-slot2:hover { opacity: 0.75; }
+
+    /* POPUP */
+    .popup-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 999;
+    }
+    .popup {
+      display: none;
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(20,20,20,0.97);
+      color: #ccc;
+      padding: 20px;
+      border-radius: 8px;
+      border: 2px solid #555;
+      width: min(420px, 92vw);
+      max-height: 80vh;
+      overflow-y: auto;
+      z-index: 1000;
+    }
+    .popup h2, .popup p { color: #ff9900; margin-top: 0; }
+    .popup ul { padding: 0; margin: 10px 0; list-style: none; }
+    .popup ul li { padding: 6px 10px; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid #333; font-size: 0.9rem; }
+    .popup ul li:hover { background: rgba(255,153,0,0.1); }
+    .popup button {
+      background: #1a1a1a; color: #ccc;
+      border: 1px solid #555; padding: 6px 14px;
+      cursor: pointer; margin-top: 10px;
+      font-family: 'Cinzel', serif;
+      transition: all 0.2s;
+    }
+    .popup button:hover { background: #252525; color: #ff9900; }
+
+    .pagination {
+      display: flex; align-items: center; gap: 10px;
+      margin-top: 10px; flex-wrap: wrap;
+    }
+    #page-info { color: #aaa; font-size: 0.85rem; }
+
+    #popup-items-container {
+      max-height: 350px;
+      overflow-y: auto;
+      border: 1px solid #555;
+      padding: 5px;
+      border-radius: 5px;
+      background: rgba(10,10,10,0.8);
+      scrollbar-width: none;
+    }
+    #popup-items-container::-webkit-scrollbar { display: none; }
+
+    /* ITEM STATS PANEL */
+    #item-stats {
+      display: none;
+      position: fixed;
+      top: 50%;
+      right: 16px;
+      transform: translateY(-50%);
+      background: rgba(20,20,20,0.97);
+      color: #ccc;
+      padding: 12px;
+      border-radius: 8px;
+      border: 2px solid #555;
+      font-size: 13px;
+      width: min(240px, 90vw);
+      max-height: 70vh;
+      overflow-y: auto;
+      z-index: 1001;
+    }
+    #item-stats h3 { color: #ff9900; margin-top: 0; font-size: 1rem; }
+    #item-stats-table { width: 100%; border-collapse: collapse; }
+    #item-stats-table td { border-bottom: 1px solid #333; padding: 4px; font-size: 12px; }
+
+    /* RARITY COLORS */
+    .rarity-poor { color: gray; }
+    .rarity-common { color: white; }
+    .rarity-uncommon { color: #2ecc71; }
+    .rarity-rare { color: #5dade2; }
+    .rarity-epic { color: #af7ac5; }
+    .rarity-legendary { color: orange; }
+
+    /* FOOTER */
+    footer {
+      background-color: #121212;
+      color: #888;
+      padding: 40px 20px;
+      text-align: center;
+    }
+    .footer-content p {
+      font-size: clamp(0.7rem, 1.5vw, 0.8rem);
+      margin: 8px 0;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.6;
+    }
+    .footer-links, .social-media { margin-top: 12px; }
+    .footer-links a, .social-media a {
+      color: #bbb; text-decoration: none;
+      margin: 0 10px; font-size: 0.95rem;
+    }
+    .footer-links a:hover, .social-media a:hover { color: #ff9900; }
+
+    /* MOBILE */
+    @media (max-width: 640px) {
+      main { padding: 24px 12px; gap: 16px; }
+      #character-section, #gear-selection { max-width: 100%; }
+      #item-stats { right: 8px; width: calc(100vw - 16px); top: auto; bottom: 8px; transform: none; max-height: 45vh; }
+      .popup { width: 96vw; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <ul>
+      <li><a href="#">Build Editor</a></li>
+      <li><a href="#">Build List</a></li>
+      <li><a href="#">[Coming Soon]</a></li>
+    </ul>
+  </nav>
+
+  <section id="class-section">
+    <div id="class-buttons">
+      <button onclick="FighterStart()">Fighter</button>
+      <button onclick="RangerStart()">Ranger</button>
+      <button onclick="ClericStart()">Cleric</button>
+      <button onclick="DruidStart()">Druid</button>
+      <button onclick="BardStart()">Bard</button>
+      <button onclick="WarlockStart()">Warlock</button>
+      <button onclick="SorcererStart()">Sorcerer</button>
+      <button onclick="WizardStart()">Wizard</button>
+      <button onclick="RogueStart()">Rogue</button>
+      <button onclick="BarbarianStart()">Barbarian</button>
+    </div>
+    <img id="class-portrait" src="" alt="Class Portrait">
+  </section>
+
+  <main>
+    <section id="character-section">
+      <div id="stat-container">
+        <h2>Stats</h2>
+        <table id="stat-table">
+          <tr><td>Strength</td><td id="strength">-</td></tr>
+          <tr><td>Vigor</td><td id="vigor">-</td></tr>
+          <tr><td>Agility</td><td id="agility">-</td></tr>
+          <tr><td>Dexterity</td><td id="dexterity">-</td></tr>
+          <tr><td>Will</td><td id="will">-</td></tr>
+          <tr><td>Knowledge</td><td id="knowledge">-</td></tr>
+          <tr><td>Resourcefulness</td><td id="resourcefulness">-</td></tr>
+          <tr><td>Armor Rating</td><td id="armor_rating">-</td></tr>
+          <tr><td>Magic Resistance</td><td id="magic_resistance">-</td></tr>
+          <tr><td>Max Health</td><td id="max_health">-</td></tr>
+          <tr><td>Action Speed</td><td id="action_speed">-</td></tr>
+          <tr><td>Phys. Dmg Reduction</td><td id="physical_damage_reduction">-</td></tr>
+          <tr><td>Magic Dmg Reduction</td><td id="magical_damage_reduction">-</td></tr>
+          <tr><td>Physical Power</td><td id="physical_power">-</td></tr>
+          <tr><td>Phys. Power Bonus</td><td id="physical_power_bonus">-</td></tr>
+          <tr><td>Magical Power</td><td id="magical_power">-</td></tr>
+          <tr><td>Magic Power Bonus</td><td id="magical_power_bonus">-</td></tr>
+          <tr><td>Movement Speed</td><td id="movement_speed">-</td></tr>
+          <tr><td>Move Speed Bonus</td><td id="move_speed_bonus">-</td></tr>
+          <tr><td>Interaction Speed</td><td id="regular_interaction_speed">-</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <section id="gear-selection">
+      <div id="svg-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 542">
+          <image id="Primary"    href="images/Inventory_WeaponSet_BG.webp"         width="148" height="200" x="15"  y="5"   class="gear-slot2"></image>
+          <image id="Secondary"  href="images/Inventory_WeaponSet_BG.webp"         width="148" height="200" x="400" y="5"   class="gear-slot2"></image>
+          <image id="head"       href="images/Slot_Equipment_HelmetGloveBoots_BG.webp" width="90" height="90" x="235" y="50"  class="gear-slot2"></image>
+          <image id="chest"      href="images/Slot_Equipment_ChestAndPants_BG.webp"   width="110" height="147" x="225" y="150" class="gear-slot2"></image>
+          <image id="legs"       href="images/Slot_Equipment_ChestAndPants_BG.webp"   width="110" height="147" x="225" y="307" class="gear-slot2"></image>
+          <image id="sash"       href="images/Slot_Equipment_HelmetGloveBoots_BG.webp" width="90" height="90" x="125" y="207" class="gear-slot2"></image>
+          <image id="back"       href="images/Slot_Equipment_HelmetGloveBoots_BG.webp" width="90" height="90" x="345" y="207" class="gear-slot2"></image>
+          <image id="hands"      href="images/Slot_Equipment_HelmetGloveBoots_BG.webp" width="90" height="90" x="125" y="367" class="gear-slot2"></image>
+          <image id="foot"       href="images/Slot_Equipment_HelmetGloveBoots_BG.webp" width="90" height="90" x="345" y="367" class="gear-slot2"></image>
+          <image id="ring-left"  href="images/Slot_Equipment_Acc_BG.webp"             width="55" height="55" x="155" y="307" class="gear-slot2"></image>
+          <image id="ring-right" href="images/Slot_Equipment_Acc_BG.webp"             width="55" height="55" x="345" y="307" class="gear-slot2"></image>
+          <image id="necklace"   href="images/Slot_Equipment_Acc_BG.webp"             width="55" height="55" x="335" y="80"  class="gear-slot2"></image>
+        </svg>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <p>DaDBuilds is a fan-made website created by the community and is in no way affiliated with or endorsed by IRONMACE. All intellectual property belongs solely to IRONMACE.</p>
+      <p>IRONMACE ™ and Dark and Darker ™ are trademarks of IRONMACE. Certain assets © IRONMACE. All rights reserved.</p>
+      <p>© 2025 DaDBuilds. All rights reserved.</p>
+      <div class="social-media">
+        <a href="#" target="_blank">Facebook</a>
+        <a href="#" target="_blank">Twitter</a>
+        <a href="#" target="_blank">Instagram</a>
+      </div>
+    </div>
+  </footer>
+
+  <div class="popup-overlay" id="popup-overlay" onclick="closePopup()"></div>
+  <div class="popup" id="popup">
+    <h2 id="popup-title">Choose your gear</h2>
+    <p id="popup-text">Loading data...</p>
+    <div id="popup-items-container">
+      <ul id="popup-items"></ul>
+    </div>
+    <div class="pagination">
+      <button id="prev-page" onclick="changePage(-1)">← Prev</button>
+      <span id="page-info"></span>
+      <button id="next-page" onclick="changePage(1)">Next →</button>
+    </div>
+    <button onclick="closePopup()">Close</button>
+  </div>
+
+  <div id="item-stats">
+    <h3>Item Stats</h3>
+    <table id="item-stats-table"></table>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    let currentSlot = "";
+    let currentPage = 1;
+    let totalPages = 1;
+
+    document.querySelectorAll("image.gear-slot2").forEach(slot => {
+      slot.addEventListener("click", function() {
+        openPopup(this.id);
+      });
+    });
+
+    async function openPopup(slotId) {
+      currentSlot = slotId;
+      currentPage = 1;
+      let apiSlot = (slotId === "ring-left" || slotId === "ring-right") ? "ring" : slotId;
+      const classCode = classCodes[klass] || 0;
+      document.getElementById("popup-title").innerText = "Select: " + currentSlot;
+      document.getElementById("popup-text").innerText = "Loading...";
+      document.getElementById("popup-items").innerHTML = "";
+      document.getElementById("popup").style.display = "block";
+      document.getElementById("popup-overlay").style.display = "block";
+      fetchItems(apiSlot, classCode);
+    }
+
+    // ✅ Volá cez Vercel serverless proxy — žiadny CORS problém
+    async function fetchItems(slotType, requiredClassCode) {
+      const apiUrl = `/api/items?slot_type=${slotType}&required_class=${requiredClassCode}&page=${currentPage}`;
+      try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+        const data = await response.json();
+        const itemList = document.getElementById("popup-items");
+        itemList.innerHTML = "";
+
+        if (!data.body || data.body.length === 0) {
+          document.getElementById("popup-text").innerText = "No items found.";
+        } else {
+          document.getElementById("popup-text").innerText = "";
+          data.body.forEach(item => {
+            let li = document.createElement("li");
+            li.innerText = item.name;
+            li.classList.add(`rarity-${item.rarity.toLowerCase()}`);
+            li.addEventListener("mouseover", () => showStats(item));
+            li.addEventListener("mouseout", hideStats);
+            li.addEventListener("click", () => applyItemToGearSlot(item));
+            itemList.appendChild(li);
+          });
+        }
+
+        totalPages = data.pagination?.num_pages || 1;
+        document.getElementById("page-info").innerText = `${currentPage} / ${totalPages}`;
+      } catch (error) {
+        console.error("Error:", error);
+        document.getElementById("popup-text").innerText = "Failed to load. Check console.";
+      }
+    }
+
+    function showStats(item) {
+      const statsContainer = document.getElementById("item-stats");
+      const statsTable = document.getElementById("item-stats-table");
+      statsTable.innerHTML = '';
+      const relevantStats = [
+        'primary_min_physical_power','primary_min_armor_rating','primary_min_magic_resistance',
+        'primary_min_max_health','primary_min_action_speed','primary_min_move_speed',
+        'primary_min_strength','primary_min_vigor','primary_min_agility',
+        'primary_min_dexterity','primary_min_will','primary_min_knowledge',
+        'primary_min_physical_damage_reduction','secondary_min_magical_damage_reduction',
+        'primary_min_magical_power','primary_min_regular_interaction_speed','secondary_min_resourcefulness'
+      ];
+      relevantStats.forEach(key => {
+        if (item[key]) {
+          const row = document.createElement('tr');
+          row.innerHTML = `<td>${key.replace(/_/g," ").replace("primary min ","").replace("secondary min ","")}</td><td>${item[key]}</td>`;
+          statsTable.appendChild(row);
+        }
+      });
+      statsContainer.style.display = "block";
+    }
+
+    function hideStats() {
+      document.getElementById("item-stats").style.display = "none";
+    }
+
+    function changePage(direction) {
+      const newPage = currentPage + direction;
+      if (newPage >= 1 && newPage <= totalPages) {
+        currentPage = newPage;
+        let apiSlot = (currentSlot === "ring-left" || currentSlot === "ring-right") ? "ring" : currentSlot;
+        fetchItems(apiSlot, classCodes[klass] || 0);
+      }
+    }
+
+    function closePopup() {
+      document.getElementById("popup").style.display = "none";
+      document.getElementById("popup-overlay").style.display = "none";
+      document.getElementById("popup-items").innerHTML = "";
+      document.getElementById("item-stats").style.display = "none";
+    }
+
+    function applyItemToGearSlot(item) {
+      const slot = document.getElementById(currentSlot);
+      if (!slot) return;
+
+      const iconUrl = `https://api.darkerdb.com/v1/items/${item.id}/icon`;
+      const svgWrapper = document.getElementById('svg-wrapper');
+      const svgEl = svgWrapper.querySelector('svg');
+      const svgRect = svgEl.getBoundingClientRect();
+      const viewBoxWidth = 560;
+
+      const scale = svgRect.width / viewBoxWidth;
+
+      const x = parseFloat(slot.getAttribute('x'));
+      const y = parseFloat(slot.getAttribute('y'));
+      const w = parseFloat(slot.getAttribute('width'));
+      const h = parseFloat(slot.getAttribute('height'));
+
+      const itemScales = { dagger:0.5, rapier:0.6, "short sword":0.65, sword:0.7, longsword:0.8, axe:0.75, "battle axe":0.75, mace:0.75, staff:0.8, bow:0.75, crossbow:0.75 };
+      const sf = itemScales[(item.type||"").toLowerCase()] || 0.85;
+
+      const nw = w * sf, nh = h * sf;
+
+      const existing = document.querySelector(`img.item-icon[data-slot='${currentSlot}']`);
+      if (existing) existing.remove();
+
+      const img = document.createElement('img');
+      img.src = iconUrl;
+      img.alt = item.name;
+      img.title = item.name;
+      img.classList.add('item-icon');
+      img.dataset.slot = currentSlot;
+      img.style.position = 'absolute';
+      img.style.left = `${(x + (w - nw) / 2) * scale}px`;
+      img.style.top  = `${(y + (h - nh) / 2) * scale}px`;
+      img.style.width  = `${nw * scale}px`;
+      img.style.height = `${nh * scale}px`;
+      img.style.pointerEvents = 'none';
+      img.style.objectFit = 'contain';
+
+      svgWrapper.appendChild(img);
+      applyItemStatsMapped(item);
+      closePopup();
+    }
+
+    function applyItemStatsMapped(item) {
+      const statMap = {
+        "primary_min_action_speed":"action_speed","primary_min_agility":"agility",
+        "primary_min_armor_rating":"armor_rating","primary_min_additional_armor_rating":"armor_rating",
+        "primary_min_dexterity":"dexterity","primary_min_knowledge":"knowledge",
+        "primary_min_strength":"strength","primary_min_vigor":"vigor",
+        "primary_min_will":"will","secondary_min_resourcefulness":"resourcefulness",
+        "primary_min_magic_resistance":"magic_resistance","primary_min_max_health":"max_health",
+        "primary_min_physical_damage_reduction":"physical_damage_reduction",
+        "secondary_min_magical_damage_reduction":"magical_damage_reduction",
+        "secondary_min_physical_power":"physical_power","primary_min_magical_power":"magical_power",
+        "primary_min_move_speed":"movement_speed","primary_min_move_speed_bonus":"move_speed_bonus",
+        "primary_min_regular_interaction_speed":"regular_interaction_speed"
+      };
+      for (const [apiKey, statId] of Object.entries(statMap)) {
+        const value = item[apiKey];
+        const cell = document.getElementById(statId);
+        if (cell && value != null && !isNaN(value)) {
+          const current = parseFloat(cell.innerText) || 0;
+          cell.innerText = (current + value).toFixed(1);
+        }
+      }
+      updateAllStats();
+    }
+
+    // Reposition item icons on window resize
+    window.addEventListener('resize', () => {
+      document.querySelectorAll('img.item-icon').forEach(img => img.remove());
+    });
+  </script>
+</body>
+</html>

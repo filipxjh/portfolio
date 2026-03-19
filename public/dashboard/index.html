@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GA4 Marketing Analytics Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #080c14;
+    --surface: #0d1220;
+    --surface2: #111827;
+    --border: rgba(255,255,255,0.06);
+    --accent: #3b82f6;
+    --accent2: #10b981;
+    --accent3: #f59e0b;
+    --accent4: #ef4444;
+    --text: #f1f5f9;
+    --muted: #64748b;
+    --muted2: #94a3b8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .shell { position: relative; z-index: 1; display: flex; min-height: 100vh; }
+
+  .sidebar {
+    width: 220px; flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    padding: 28px 0;
+    position: sticky; top: 0; height: 100vh;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; padding: 0 20px 28px; border-bottom: 1px solid var(--border); }
+  .logo-icon { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--accent), #6366f1); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: #fff; }
+  .logo-text { font-size: 14px; font-weight: 700; }
+  .logo-sub { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+
+  .nav { padding: 20px 12px; flex: 1; }
+  .nav-label { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; padding: 0 8px; margin-bottom: 8px; font-family: 'JetBrains Mono', monospace; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; font-size: 13px; color: var(--muted2); cursor: pointer; transition: all 0.2s; margin-bottom: 2px; }
+  .nav-item:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+  .nav-item.active { background: rgba(59,130,246,0.12); color: var(--accent); }
+  .nav-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); margin-right: 6px; animation: blink 2s infinite; }
+
+  .main { flex: 1; padding: 32px 36px; overflow-x: hidden; }
+
+  .header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 32px; }
+  .header-title { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+  .header-sub { font-size: 13px; color: var(--muted); margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+  .date-range { display: flex; align-items: center; gap: 8px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 16px; font-size: 13px; color: var(--muted2); font-family: 'JetBrains Mono', monospace; cursor: pointer; }
+  .date-range:hover { border-color: rgba(59,130,246,0.3); }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; position: relative; overflow: hidden; transition: border-color 0.2s, transform 0.2s; animation: fadeUp 0.5s both; }
+  .kpi-card:hover { border-color: rgba(59,130,246,0.25); transform: translateY(-2px); }
+  .kpi-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--card-color, var(--accent)); opacity: 0.7; }
+  .kpi-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; font-family: 'JetBrains Mono', monospace; }
+  .kpi-value { font-size: 30px; font-weight: 800; letter-spacing: -1px; font-family: 'JetBrains Mono', monospace; }
+  .kpi-change { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; margin-top: 6px; font-family: 'JetBrains Mono', monospace; padding: 3px 8px; border-radius: 20px; }
+  .kpi-change.up { color: var(--accent2); background: rgba(16,185,129,0.1); }
+  .kpi-change.down { color: var(--accent4); background: rgba(239,68,68,0.1); }
+  .kpi-icon { position: absolute; top: 18px; right: 18px; font-size: 20px; opacity: 0.15; }
+
+  .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; animation: fadeUp 0.5s 0.2s both; }
+  .chart-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+  .chart-title { font-size: 15px; font-weight: 700; }
+  .chart-sub { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+  .chart-badge { font-size: 11px; padding: 4px 10px; border-radius: 20px; background: rgba(59,130,246,0.1); color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+
+  .tabs { display: flex; gap: 4px; }
+  .tab { padding: 6px 14px; border-radius: 8px; font-size: 12px; cursor: pointer; transition: all 0.2s; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .tab.active { background: rgba(59,130,246,0.15); color: var(--accent); }
+  .tab:hover:not(.active) { background: rgba(255,255,255,0.04); color: var(--text); }
+
+  .bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  .channel-table { width: 100%; border-collapse: collapse; }
+  .channel-table th { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); padding: 0 0 12px; text-align: left; font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+  .channel-table td { padding: 10px 0; border-top: 1px solid var(--border); font-size: 13px; }
+  .channel-name { display: flex; align-items: center; gap: 10px; font-weight: 600; }
+  .channel-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .bar-wrap { width: 80px; height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 2px; }
+  .badge-roas { font-size: 11px; font-family: 'JetBrains Mono', monospace; padding: 2px 8px; border-radius: 6px; }
+
+  .campaign-item { padding: 14px 0; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; transition: padding 0.15s; }
+  .campaign-item:last-child { border-bottom: none; }
+  .campaign-item:hover { padding-left: 6px; }
+  .campaign-name { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+  .campaign-meta { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .campaign-stat { text-align: right; }
+  .campaign-stat .big { font-size: 16px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+  .campaign-stat .small { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .status-pill { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+  .status-pill.active { background: rgba(16,185,129,0.1); color: var(--accent2); }
+  .status-pill.paused { background: rgba(245,158,11,0.1); color: var(--accent3); }
+
+  @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+  @media(max-width:1100px){ .kpi-grid{grid-template-columns:repeat(2,1fr);} .charts-row,.bottom-row{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">G4</div>
+      <div><div class="logo-text">Analytics</div><div class="logo-sub">GA4 Dashboard</div></div>
+    </div>
+    <nav class="nav">
+      <div class="nav-label">Overview</div>
+      <div class="nav-item active"><div class="nav-dot"></div> Performance</div>
+      <div class="nav-item"><div class="nav-dot"></div> Acquisition</div>
+      <div class="nav-item"><div class="nav-dot"></div> Conversions</div>
+      <div style="margin-top:20px" class="nav-label">Campaigns</div>
+      <div class="nav-item"><div class="nav-dot"></div> Google Ads</div>
+      <div class="nav-item"><div class="nav-dot"></div> Meta Ads</div>
+      <div class="nav-item"><div class="nav-dot"></div> Email</div>
+      <div style="margin-top:20px" class="nav-label">Reports</div>
+      <div class="nav-item"><div class="nav-dot"></div> Weekly Digest</div>
+      <div class="nav-item"><div class="nav-dot"></div> Attribution</div>
+      <div class="nav-item"><div class="nav-dot"></div> Audiences</div>
+    </nav>
+    <div class="sidebar-footer">
+      <span class="status-dot"></span>Live · Updated now<br>
+      <span style="color:#10b981;margin-top:4px;display:block;">Property: Demo Store</span>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="header">
+      <div>
+        <div class="header-title">Campaign Performance</div>
+        <div class="header-sub">// Q1 2026 · All channels · Attribution: Last click</div>
+      </div>
+      <div class="date-range">📅 Jan 1 – Mar 17, 2026 <span style="color:#3b82f6">▾</span></div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card" style="--card-color:#3b82f6;animation-delay:0s">
+        <div class="kpi-icon">👥</div>
+        <div class="kpi-label">Total Sessions</div>
+        <div class="kpi-value" id="v-sessions">—</div>
+        <div class="kpi-change up">↑ 18.4% vs prev period</div>
+      </div>
+      <div class="kpi-card" style="--card-color:#10b981;animation-delay:0.08s">
+        <div class="kpi-icon">🎯</div>
+        <div class="kpi-label">Conversions</div>
+        <div class="kpi-value" id="v-conv">—</div>
+        <div class="kpi-change up">↑ 23.1% vs prev period</div>
+      </div>
+      <div class="kpi-card" style="--card-color:#f59e0b;animation-delay:0.16s">
+        <div class="kpi-icon">💶</div>
+        <div class="kpi-label">Revenue</div>
+        <div class="kpi-value" id="v-rev">—</div>
+        <div class="kpi-change up">↑ 31.7% vs prev period</div>
+      </div>
+      <div class="kpi-card" style="--card-color:#8b5cf6;animation-delay:0.24s">
+        <div class="kpi-icon">📈</div>
+        <div class="kpi-label">Blended ROAS</div>
+        <div class="kpi-value" id="v-roas">—</div>
+        <div class="kpi-change down">↓ 0.2x vs prev period</div>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Sessions &amp; Conversions over time</div>
+            <div class="chart-sub">// Daily · Jan–Mar 2026</div>
+          </div>
+          <div class="tabs">
+            <div class="tab active" onclick="switchTab(this,'sessions')">Sessions</div>
+            <div class="tab" onclick="switchTab(this,'revenue')">Revenue</div>
+            <div class="tab" onclick="switchTab(this,'cpa')">CPA</div>
+          </div>
+        </div>
+        <canvas id="lineChart" height="90"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Traffic Sources</div>
+            <div class="chart-sub">// By channel · sessions</div>
+          </div>
+          <div class="chart-badge">GA4</div>
+        </div>
+        <canvas id="donutChart" height="160"></canvas>
+        <div id="donut-legend" style="margin-top:16px;display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
+    </div>
+
+    <div class="bottom-row">
+      <div class="chart-card" style="animation-delay:0.3s">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Channel Breakdown</div>
+            <div class="chart-sub">// Sessions · CVR · ROAS</div>
+          </div>
+        </div>
+        <table class="channel-table">
+          <thead><tr><th>Channel</th><th>Sessions</th><th>CVR</th><th style="text-align:right">ROAS</th></tr></thead>
+          <tbody id="channel-body"></tbody>
+        </table>
+      </div>
+      <div class="chart-card" style="animation-delay:0.38s">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Top Campaigns</div>
+            <div class="chart-sub">// Ranked by revenue</div>
+          </div>
+        </div>
+        <div id="campaigns-list"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const DAYS = 76;
+const labels = [];
+for(let i=0;i<DAYS;i++){
+  const d=new Date(2026,0,1); d.setDate(d.getDate()+i);
+  labels.push(d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'}));
+}
+
+const sessionsData = labels.map((_,i)=>{
+  const trend=800+i*18, noise=(Math.random()-0.5)*300, spike=(i===30||i===55)?600:0;
+  return Math.max(400,Math.round(trend+noise+spike));
+});
+const convData = sessionsData.map(s=>Math.round(s*(0.025+Math.random()*0.02)));
+const revenueData = convData.map(c=>Math.round(c*(65+Math.random()*40)));
+const cpaData = revenueData.map((r,i)=>Math.round(r/((2.8+Math.random()*0.8))/convData[i]));
+
+const totalSessions = sessionsData.reduce((a,b)=>a+b,0);
+const totalConv = convData.reduce((a,b)=>a+b,0);
+const totalRev = revenueData.reduce((a,b)=>a+b,0);
+const totalSpend = Math.round(totalRev/3.2);
+const roas = (totalRev/totalSpend).toFixed(1);
+
+function animateCount(id,target,prefix='',suffix='',duration=1400){
+  const el=document.getElementById(id); let start=null;
+  const step=ts=>{
+    if(!start)start=ts;
+    const p=Math.min((ts-start)/duration,1), e=1-Math.pow(1-p,3);
+    el.textContent=prefix+Math.round(e*target).toLocaleString('de-DE')+suffix;
+    if(p<1)requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+window.addEventListener('load',()=>{
+  animateCount('v-sessions',totalSessions);
+  animateCount('v-conv',totalConv);
+  animateCount('v-rev',totalRev,'€');
+  const re=document.getElementById('v-roas'); let s=null;
+  const step=ts=>{
+    if(!s)s=ts; const p=Math.min((ts-s)/1400,1),e=1-Math.pow(1-p,3);
+    re.textContent=(e*parseFloat(roas)).toFixed(1)+'x';
+    if(p<1)requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+});
+
+// Line chart
+const ctx=document.getElementById('lineChart').getContext('2d');
+const gB=ctx.createLinearGradient(0,0,0,220); gB.addColorStop(0,'rgba(59,130,246,0.3)'); gB.addColorStop(1,'rgba(59,130,246,0)');
+const gG=ctx.createLinearGradient(0,0,0,220); gG.addColorStop(0,'rgba(16,185,129,0.3)'); gG.addColorStop(1,'rgba(16,185,129,0)');
+
+const lineChart=new Chart(ctx,{
+  type:'line',
+  data:{labels,datasets:[
+    {label:'Sessions',data:sessionsData,borderColor:'#3b82f6',backgroundColor:gB,borderWidth:2,pointRadius:0,fill:true,tension:0.4},
+    {label:'Conversions',data:convData.map(c=>c*20),borderColor:'#10b981',backgroundColor:gG,borderWidth:2,pointRadius:0,fill:true,tension:0.4,yAxisID:'y1'}
+  ]},
+  options:{
+    responsive:true, interaction:{mode:'index',intersect:false},
+    plugins:{
+      legend:{display:false},
+      tooltip:{backgroundColor:'#111827',borderColor:'rgba(255,255,255,0.08)',borderWidth:1,titleColor:'#94a3b8',bodyColor:'#f1f5f9',titleFont:{family:'JetBrains Mono',size:11},bodyFont:{family:'JetBrains Mono',size:12},
+        callbacks:{label:c=>c.datasetIndex===0?` Sessions: ${c.raw.toLocaleString()}`:` Conv: ${Math.round(c.raw/20).toLocaleString()}`}
+      }
+    },
+    scales:{
+      x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#64748b',font:{family:'JetBrains Mono',size:10},maxTicksLimit:8},border:{color:'rgba(255,255,255,0.06)'}},
+      y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#64748b',font:{family:'JetBrains Mono',size:10},callback:v=>v.toLocaleString()},border:{color:'rgba(255,255,255,0.06)'}},
+      y1:{display:false}
+    }
+  }
+});
+
+const datasets={sessions:sessionsData,revenue:revenueData,cpa:cpaData};
+window.switchTab=function(el,key){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); el.classList.add('active');
+  lineChart.data.datasets[0].data=datasets[key];
+  lineChart.data.datasets[1].hidden=key!=='sessions';
+  lineChart.options.scales.y.ticks.callback=key==='revenue'?v=>'€'+Math.round(v/1000)+'k':key==='cpa'?v=>'€'+v:v=>v.toLocaleString();
+  lineChart.update();
+};
+
+// Donut
+const channels=[
+  {name:'Organic Search',sessions:Math.round(totalSessions*0.31),color:'#3b82f6'},
+  {name:'Paid Search',sessions:Math.round(totalSessions*0.27),color:'#10b981'},
+  {name:'Paid Social',sessions:Math.round(totalSessions*0.19),color:'#f59e0b'},
+  {name:'Direct',sessions:Math.round(totalSessions*0.13),color:'#8b5cf6'},
+  {name:'Email',sessions:Math.round(totalSessions*0.10),color:'#06b6d4'},
+];
+new Chart(document.getElementById('donutChart').getContext('2d'),{
+  type:'doughnut',
+  data:{labels:channels.map(c=>c.name),datasets:[{data:channels.map(c=>c.sessions),backgroundColor:channels.map(c=>c.color+'cc'),borderColor:channels.map(c=>c.color),borderWidth:1,hoverOffset:6}]},
+  options:{cutout:'72%',plugins:{legend:{display:false},tooltip:{backgroundColor:'#111827',borderColor:'rgba(255,255,255,0.08)',borderWidth:1,titleColor:'#94a3b8',bodyColor:'#f1f5f9',titleFont:{family:'JetBrains Mono',size:11},bodyFont:{family:'JetBrains Mono',size:12},callbacks:{label:c=>`  ${c.raw.toLocaleString()} sessions`}}}}
+});
+const legend=document.getElementById('donut-legend');
+channels.forEach(c=>{
+  const pct=Math.round(c.sessions/totalSessions*100);
+  legend.innerHTML+=`<div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;"><div style="display:flex;align-items:center;gap:8px;"><div style="width:8px;height:8px;border-radius:2px;background:${c.color};flex-shrink:0;"></div><span style="color:#94a3b8;font-family:'JetBrains Mono',monospace;">${c.name}</span></div><span style="font-family:'JetBrains Mono',monospace;font-weight:600;">${pct}%</span></div>`;
+});
+
+// Channel table
+const chData=[
+  {name:'Paid Search',color:'#10b981',sessions:Math.round(totalSessions*0.27),cvr:'3.8%',roas:4.2,ok:true},
+  {name:'Organic Search',color:'#3b82f6',sessions:Math.round(totalSessions*0.31),cvr:'2.9%',roas:null,ok:true},
+  {name:'Paid Social',color:'#f59e0b',sessions:Math.round(totalSessions*0.19),cvr:'2.1%',roas:2.8,ok:false},
+  {name:'Email',color:'#06b6d4',sessions:Math.round(totalSessions*0.10),cvr:'4.6%',roas:null,ok:true},
+  {name:'Direct',color:'#8b5cf6',sessions:Math.round(totalSessions*0.13),cvr:'3.1%',roas:null,ok:true},
+];
+const maxS=Math.max(...chData.map(c=>c.sessions));
+const tbody=document.getElementById('channel-body');
+chData.forEach(c=>{
+  const bw=Math.round(c.sessions/maxS*80);
+  tbody.innerHTML+=`<tr><td><div class="channel-name"><div class="channel-dot" style="background:${c.color}"></div>${c.name}</div></td><td><div style="display:flex;flex-direction:column;gap:4px;"><span style="font-family:'JetBrains Mono',monospace;">${c.sessions.toLocaleString()}</span><div class="bar-wrap"><div class="bar-fill" style="width:${bw}px;background:${c.color};"></div></div></div></td><td style="font-family:'JetBrains Mono',monospace;color:#94a3b8;">${c.cvr}</td><td style="text-align:right;">${c.roas?`<span class="badge-roas" style="background:${c.ok?'rgba(16,185,129,0.1)':'rgba(245,158,11,0.1)'};color:${c.ok?'#10b981':'#f59e0b'}">${c.roas}x</span>`:'<span style="color:#475569">—</span>'}</td></tr>`;
+});
+
+// Campaigns
+const camps=[
+  {name:'Brand Search – SK',type:'Google Ads',status:'active',rev:'€'+Math.round(totalRev*0.28).toLocaleString(),label:'Revenue'},
+  {name:'Retargeting – Meta',type:'Meta Ads',status:'active',rev:'€'+Math.round(totalRev*0.19).toLocaleString(),label:'Revenue'},
+  {name:'Non-brand – Google',type:'Google Ads',status:'active',rev:'€'+Math.round(totalRev*0.17).toLocaleString(),label:'Revenue'},
+  {name:'Prospecting – Meta',type:'Meta Ads',status:'paused',rev:'€'+Math.round(totalRev*0.11).toLocaleString(),label:'Revenue'},
+  {name:'Weekly Newsletter',type:'Email',status:'active',rev:Math.round(totalConv*0.09)+' conv',label:'Conversions'},
+];
+const cl=document.getElementById('campaigns-list');
+camps.forEach(c=>{
+  cl.innerHTML+=`<div class="campaign-item"><div><div class="campaign-name">${c.name}</div><div style="display:flex;gap:8px;margin-top:4px;align-items:center;"><span class="campaign-meta">${c.type}</span><span class="status-pill ${c.status}">${c.status}</span></div></div><div class="campaign-stat"><div class="big">${c.rev}</div><div class="small">${c.label}</div></div></div>`;
+});
+</script>
+</body>
+</html>
