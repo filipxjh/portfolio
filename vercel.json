@@ -7,12 +7,28 @@
       "destination": "/api/items"
     },
     {
-      "source": "/dnd-builds/(.*)",
-      "destination": "/dnd-builds/$1"
+      "source": "/(.*)\\.html",
+      "destination": "/$1.html"
     },
     {
-      "source": "/dashboard/(.*)",
-      "destination": "/dashboard/$1"
+      "source": "/(.*)\\.js",
+      "destination": "/$1.js"
+    },
+    {
+      "source": "/(.*)\\.css",
+      "destination": "/$1.css"
+    },
+    {
+      "source": "/(.*)\\.webp",
+      "destination": "/$1.webp"
+    },
+    {
+      "source": "/(.*)\\.png",
+      "destination": "/$1.png"
+    },
+    {
+      "source": "/(.*)\\.svg",
+      "destination": "/$1.svg"
     },
     {
       "source": "/(.*)",
