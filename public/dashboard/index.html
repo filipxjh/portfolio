@@ -5,233 +5,415 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>GA4 Marketing Analytics Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <style>
   :root {
-    --bg: #080c14;
-    --surface: #0d1220;
-    --surface2: #111827;
-    --border: rgba(255,255,255,0.06);
-    --accent: #3b82f6;
-    --accent2: #10b981;
-    --accent3: #f59e0b;
-    --accent4: #ef4444;
-    --text: #f1f5f9;
-    --muted: #64748b;
-    --muted2: #94a3b8;
+    --bg:       #f8f7f5;
+    --surface:  #ffffff;
+    --surface2: #f1f0ee;
+    --border:   rgba(0,0,0,0.07);
+    --border2:  rgba(0,0,0,0.12);
+    --blue:     #1d4ed8;
+    --indigo:   #4338ca;
+    --violet:   #6d28d9;
+    --blue-lt:  #eff6ff;
+    --indigo-lt:#eef2ff;
+    --violet-lt:#f5f3ff;
+    --text:     #1a1a1a;
+    --muted:    #6b7280;
+    --muted2:   #9ca3af;
+    --green:    #16a34a;
+    --red:      #dc2626;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'Syne', sans-serif;
+    font-family: 'Montserrat', sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
   }
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background-image:
-      linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
-    background-size: 48px 48px;
-    pointer-events: none;
-    z-index: 0;
-  }
-  .shell { position: relative; z-index: 1; display: flex; min-height: 100vh; }
 
+  /* ── LAYOUT ── */
+  .shell { display: flex; min-height: 100vh; }
+
+  /* ── SIDEBAR ── */
   .sidebar {
     width: 220px; flex-shrink: 0;
     background: var(--surface);
     border-right: 1px solid var(--border);
     display: flex; flex-direction: column;
-    padding: 28px 0;
+    padding: 24px 0;
     position: sticky; top: 0; height: 100vh;
+    transition: transform 0.25s ease;
   }
-  .logo { display: flex; align-items: center; gap: 10px; padding: 0 20px 28px; border-bottom: 1px solid var(--border); }
-  .logo-icon { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--accent), #6366f1); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: #fff; }
-  .logo-text { font-size: 14px; font-weight: 700; }
-  .logo-sub { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 18px 22px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo-icon {
+    width: 34px; height: 34px;
+    background: linear-gradient(135deg, var(--blue), var(--violet));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800; color: #fff; letter-spacing: 0.5px;
+    flex-shrink: 0;
+  }
+  .logo-name { font-size: 13px; font-weight: 700; color: var(--text); }
+  .logo-sub  { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 1px; }
 
-  .nav { padding: 20px 12px; flex: 1; }
-  .nav-label { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; padding: 0 8px; margin-bottom: 8px; font-family: 'JetBrains Mono', monospace; }
-  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; font-size: 13px; color: var(--muted2); cursor: pointer; transition: all 0.2s; margin-bottom: 2px; }
-  .nav-item:hover { background: rgba(255,255,255,0.04); color: var(--text); }
-  .nav-item.active { background: rgba(59,130,246,0.12); color: var(--accent); }
-  .nav-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .nav { padding: 18px 10px; flex: 1; }
+  .nav-label { font-size: 9.5px; color: var(--muted2); letter-spacing: 2px; text-transform: uppercase; padding: 0 8px; margin: 16px 0 6px; font-family: 'DM Mono', monospace; }
+  .nav-label:first-child { margin-top: 0; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px; font-size: 12.5px; color: var(--muted);
+    cursor: pointer; transition: all 0.15s; margin-bottom: 1px;
+    font-weight: 500; letter-spacing: 0.1px;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: var(--blue-lt); color: var(--blue); font-weight: 600; }
+  .nav-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
 
-  .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
-  .status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); margin-right: 6px; animation: blink 2s infinite; }
+  .sidebar-footer {
+    padding: 14px 18px;
+    border-top: 1px solid var(--border);
+    font-size: 10.5px; color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    line-height: 1.6;
+  }
+  .live-dot {
+    display: inline-block; width: 6px; height: 6px;
+    border-radius: 50%; background: var(--green);
+    margin-right: 5px; animation: blink 2s infinite;
+    vertical-align: middle;
+  }
 
-  .main { flex: 1; padding: 32px 36px; overflow-x: hidden; }
+  /* ── MAIN ── */
+  .main { flex: 1; padding: 28px 32px; min-width: 0; overflow-x: hidden; }
 
-  .header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 32px; }
-  .header-title { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
-  .header-sub { font-size: 13px; color: var(--muted); margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
-  .date-range { display: flex; align-items: center; gap: 8px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 16px; font-size: 13px; color: var(--muted2); font-family: 'JetBrains Mono', monospace; cursor: pointer; }
-  .date-range:hover { border-color: rgba(59,130,246,0.3); }
+  /* ── TOPBAR (mobile) ── */
+  .topbar {
+    display: none;
+    align-items: center; justify-content: space-between;
+    padding: 14px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 50;
+  }
+  .topbar-logo { display: flex; align-items: center; gap: 8px; }
+  .hamburger {
+    background: none; border: none; cursor: pointer;
+    display: flex; flex-direction: column; gap: 4px; padding: 4px;
+  }
+  .hamburger span { display: block; width: 20px; height: 1.5px; background: var(--text); transition: all 0.2s; }
 
-  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-  .kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; position: relative; overflow: hidden; transition: border-color 0.2s, transform 0.2s; animation: fadeUp 0.5s both; }
-  .kpi-card:hover { border-color: rgba(59,130,246,0.25); transform: translateY(-2px); }
-  .kpi-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--card-color, var(--accent)); opacity: 0.7; }
-  .kpi-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; font-family: 'JetBrains Mono', monospace; }
-  .kpi-value { font-size: 30px; font-weight: 800; letter-spacing: -1px; font-family: 'JetBrains Mono', monospace; }
-  .kpi-change { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; margin-top: 6px; font-family: 'JetBrains Mono', monospace; padding: 3px 8px; border-radius: 20px; }
-  .kpi-change.up { color: var(--accent2); background: rgba(16,185,129,0.1); }
-  .kpi-change.down { color: var(--accent4); background: rgba(239,68,68,0.1); }
-  .kpi-icon { position: absolute; top: 18px; right: 18px; font-size: 20px; opacity: 0.15; }
+  /* ── HEADER ── */
+  .header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 28px; gap: 16px; flex-wrap: wrap;
+  }
+  .header-title { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; color: var(--text); }
+  .header-sub { font-size: 11.5px; color: var(--muted); margin-top: 3px; font-family: 'DM Mono', monospace; }
+  .date-pill {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface); border: 1px solid var(--border2);
+    padding: 9px 16px; font-size: 12px; color: var(--muted);
+    font-family: 'DM Mono', monospace; white-space: nowrap;
+    flex-shrink: 0;
+  }
 
-  .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
-  .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; animation: fadeUp 0.5s 0.2s both; }
-  .chart-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
-  .chart-title { font-size: 15px; font-weight: 700; }
-  .chart-sub { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
-  .chart-badge { font-size: 11px; padding: 4px 10px; border-radius: 20px; background: rgba(59,130,246,0.1); color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+  /* ── KPI GRID ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px; margin-bottom: 20px;
+  }
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 20px 18px;
+    position: relative; overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    animation: fadeUp 0.4s both;
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--card-color, var(--blue));
+  }
+  .kpi-card:hover { border-color: var(--border2); box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+  .kpi-icon { position: absolute; top: 16px; right: 16px; font-size: 18px; opacity: 0.12; }
+  .kpi-label {
+    font-size: 10px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 1.5px; margin-bottom: 10px;
+    font-family: 'DM Mono', monospace;
+  }
+  .kpi-value {
+    font-size: 28px; font-weight: 800; letter-spacing: -1px;
+    color: var(--text); line-height: 1;
+  }
+  .kpi-change {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; margin-top: 8px;
+    font-family: 'DM Mono', monospace;
+    padding: 3px 8px;
+  }
+  .kpi-change.up   { color: var(--green); background: rgba(22,163,74,0.08); }
+  .kpi-change.down { color: var(--red);   background: rgba(220,38,38,0.08); }
 
-  .tabs { display: flex; gap: 4px; }
-  .tab { padding: 6px 14px; border-radius: 8px; font-size: 12px; cursor: pointer; transition: all 0.2s; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
-  .tab.active { background: rgba(59,130,246,0.15); color: var(--accent); }
-  .tab:hover:not(.active) { background: rgba(255,255,255,0.04); color: var(--text); }
+  /* ── CHARTS ── */
+  .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-bottom: 20px; }
+  .bottom-row  { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
-  .bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 22px 20px;
+    animation: fadeUp 0.4s 0.15s both;
+  }
+  .chart-header {
+    display: flex; justify-content: space-between;
+    align-items: flex-start; margin-bottom: 18px; gap: 12px;
+  }
+  .chart-title { font-size: 13.5px; font-weight: 700; color: var(--text); }
+  .chart-sub   { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 2px; }
+  .chart-badge {
+    font-size: 10px; padding: 3px 10px;
+    background: var(--blue-lt); color: var(--blue);
+    font-family: 'DM Mono', monospace; font-weight: 600;
+    letter-spacing: 0.5px; flex-shrink: 0;
+  }
 
+  .tabs { display: flex; gap: 3px; flex-shrink: 0; }
+  .tab {
+    padding: 5px 12px; font-size: 11px; cursor: pointer;
+    transition: all 0.15s; color: var(--muted);
+    font-family: 'DM Mono', monospace; font-weight: 500;
+    border: 1px solid transparent;
+  }
+  .tab.active { background: var(--blue-lt); color: var(--blue); border-color: rgba(29,78,216,0.15); }
+  .tab:hover:not(.active) { background: var(--surface2); color: var(--text); }
+
+  /* ── CHANNEL TABLE ── */
   .channel-table { width: 100%; border-collapse: collapse; }
-  .channel-table th { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); padding: 0 0 12px; text-align: left; font-family: 'JetBrains Mono', monospace; font-weight: 500; }
-  .channel-table td { padding: 10px 0; border-top: 1px solid var(--border); font-size: 13px; }
-  .channel-name { display: flex; align-items: center; gap: 10px; font-weight: 600; }
-  .channel-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .bar-wrap { width: 80px; height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
-  .bar-fill { height: 100%; border-radius: 2px; }
-  .badge-roas { font-size: 11px; font-family: 'JetBrains Mono', monospace; padding: 2px 8px; border-radius: 6px; }
+  .channel-table th {
+    font-size: 9.5px; text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--muted2); padding: 0 0 10px; text-align: left;
+    font-family: 'DM Mono', monospace; font-weight: 500;
+  }
+  .channel-table td { padding: 9px 0; border-top: 1px solid var(--border); font-size: 12.5px; }
+  .channel-name { display: flex; align-items: center; gap: 9px; font-weight: 600; }
+  .channel-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .bar-wrap { width: 60px; height: 3px; background: rgba(0,0,0,0.06); overflow: hidden; }
+  .bar-fill { height: 100%; }
 
-  .campaign-item { padding: 14px 0; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; transition: padding 0.15s; }
+  /* ── CAMPAIGNS ── */
+  .campaign-item {
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    transition: padding 0.15s; gap: 12px;
+  }
   .campaign-item:last-child { border-bottom: none; }
   .campaign-item:hover { padding-left: 6px; }
-  .campaign-name { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
-  .campaign-meta { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
-  .campaign-stat { text-align: right; }
-  .campaign-stat .big { font-size: 16px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
-  .campaign-stat .small { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
-  .status-pill { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-family: 'JetBrains Mono', monospace; font-weight: 500; }
-  .status-pill.active { background: rgba(16,185,129,0.1); color: var(--accent2); }
-  .status-pill.paused { background: rgba(245,158,11,0.1); color: var(--accent3); }
+  .campaign-name { font-size: 12.5px; font-weight: 600; margin-bottom: 3px; }
+  .campaign-meta { font-size: 10.5px; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .campaign-stat { text-align: right; flex-shrink: 0; }
+  .campaign-stat .big   { font-size: 14px; font-weight: 700; color: var(--blue); font-family: 'DM Mono', monospace; }
+  .campaign-stat .small { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .status-pill {
+    font-size: 9.5px; padding: 2px 8px; font-family: 'DM Mono', monospace;
+    font-weight: 600; display: inline-block;
+  }
+  .status-pill.active { background: rgba(22,163,74,0.1); color: var(--green); }
+  .status-pill.paused { background: rgba(29,78,216,0.08); color: var(--indigo); }
 
-  @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-  @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+  /* ── DONUT LEGEND ── */
+  .legend-item {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 11.5px; padding: 4px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .legend-item:last-child { border-bottom: none; }
+  .legend-left { display: flex; align-items: center; gap: 8px; }
+  .legend-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .legend-name { color: var(--muted); font-family: 'DM Mono', monospace; font-size: 11px; }
+  .legend-pct  { font-weight: 700; font-family: 'DM Mono', monospace; color: var(--text); font-size: 11.5px; }
 
-  @media(max-width:1100px){ .kpi-grid{grid-template-columns:repeat(2,1fr);} .charts-row,.bottom-row{grid-template-columns:1fr;} }
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes blink  { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1100px) {
+    .kpi-grid    { grid-template-columns: repeat(2, 1fr); }
+    .charts-row  { grid-template-columns: 1fr; }
+    .bottom-row  { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 768px) {
+    .topbar  { display: flex; }
+    .sidebar {
+      position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
+      transform: translateX(-100%);
+      box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+    }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-overlay {
+      display: none; position: fixed; inset: 0; z-index: 99;
+      background: rgba(0,0,0,0.3); backdrop-filter: blur(2px);
+    }
+    .sidebar-overlay.open { display: block; }
+    .main { padding: 20px 16px; }
+    .kpi-grid  { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .kpi-value { font-size: 22px; }
+    .charts-row, .bottom-row { gap: 10px; }
+    .chart-card { padding: 16px 14px; }
+    .header-title { font-size: 18px; }
+  }
+  @media (max-width: 480px) {
+    .kpi-grid  { grid-template-columns: 1fr; }
+    .tabs { flex-wrap: wrap; }
+    .date-pill { font-size: 10.5px; padding: 7px 12px; }
+  }
 </style>
 </head>
 <body>
+
+<!-- Mobile sidebar overlay -->
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- Mobile topbar -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <div class="logo-icon" style="width:28px;height:28px;font-size:9px;">G4</div>
+    <span style="font-size:13px;font-weight:700;">Analytics</span>
+  </div>
+  <button class="hamburger" onclick="toggleSidebar()" id="hamburger">
+    <span></span><span></span><span></span>
+  </button>
+</div>
+
 <div class="shell">
-  <aside class="sidebar">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
     <div class="logo">
       <div class="logo-icon">G4</div>
-      <div><div class="logo-text">Analytics</div><div class="logo-sub">GA4 Dashboard</div></div>
+      <div>
+        <div class="logo-name">Analytics</div>
+        <div class="logo-sub">GA4 Dashboard</div>
+      </div>
     </div>
     <nav class="nav">
       <div class="nav-label">Overview</div>
       <div class="nav-item active"><div class="nav-dot"></div> Performance</div>
       <div class="nav-item"><div class="nav-dot"></div> Acquisition</div>
       <div class="nav-item"><div class="nav-dot"></div> Conversions</div>
-      <div style="margin-top:20px" class="nav-label">Campaigns</div>
+      <div class="nav-label">Campaigns</div>
       <div class="nav-item"><div class="nav-dot"></div> Google Ads</div>
       <div class="nav-item"><div class="nav-dot"></div> Meta Ads</div>
       <div class="nav-item"><div class="nav-dot"></div> Email</div>
-      <div style="margin-top:20px" class="nav-label">Reports</div>
+      <div class="nav-label">Reports</div>
       <div class="nav-item"><div class="nav-dot"></div> Weekly Digest</div>
       <div class="nav-item"><div class="nav-dot"></div> Attribution</div>
       <div class="nav-item"><div class="nav-dot"></div> Audiences</div>
     </nav>
     <div class="sidebar-footer">
-      <span class="status-dot"></span>Live · Updated now<br>
-      <span style="color:#10b981;margin-top:4px;display:block;">Property: Demo Store</span>
+      <span class="live-dot"></span>Live · Updated now<br>
+      <span style="color:var(--green);margin-top:3px;display:block;">Property: Demo Store</span>
     </div>
   </aside>
 
+  <!-- Main content -->
   <main class="main">
     <div class="header">
       <div>
         <div class="header-title">Campaign Performance</div>
         <div class="header-sub">// Google Merchandise Store · GA4 Demo Account · Property ID: 213025502</div>
       </div>
-      <div class="date-range">📅 Dec 19, 2025 – Mar 18, 2026 <span style="color:#3b82f6">▾</span></div>
+      <div class="date-pill">📅 Dec 19, 2025 – Mar 18, 2026</div>
     </div>
 
+    <!-- KPI Cards -->
     <div class="kpi-grid">
-      <div class="kpi-card" style="--card-color:#3b82f6;animation-delay:0s">
+      <div class="kpi-card" style="--card-color:var(--blue);animation-delay:0s">
         <div class="kpi-icon">👥</div>
         <div class="kpi-label">Total Sessions</div>
         <div class="kpi-value" id="v-sessions">—</div>
         <div class="kpi-change up">↑ 19.4% vs prev period</div>
       </div>
-      <div class="kpi-card" style="--card-color:#10b981;animation-delay:0.08s">
+      <div class="kpi-card" style="--card-color:var(--indigo);animation-delay:0.08s">
         <div class="kpi-icon">🎯</div>
-        <div class="kpi-label">Key Events</div>
+        <div class="kpi-label">Engaged Sessions</div>
         <div class="kpi-value" id="v-conv">—</div>
         <div class="kpi-change down">↓ 5.0% vs prev period</div>
       </div>
-      <div class="kpi-card" style="--card-color:#f59e0b;animation-delay:0.16s">
-        <div class="kpi-icon">💶</div>
-        <div class="kpi-label">Est. Revenue</div>
+      <div class="kpi-card" style="--card-color:var(--violet);animation-delay:0.16s">
+        <div class="kpi-icon">📊</div>
+        <div class="kpi-label">Engagement Rate</div>
         <div class="kpi-value" id="v-rev">—</div>
-        <div class="kpi-change up">↑ 12.3% vs prev period</div>
+        <div class="kpi-change up">↑ 2.1% vs prev period</div>
       </div>
-      <div class="kpi-card" style="--card-color:#8b5cf6;animation-delay:0.24s">
-        <div class="kpi-icon">📈</div>
-        <div class="kpi-label">Paid ROAS</div>
+      <div class="kpi-card" style="--card-color:#1d4ed8;animation-delay:0.24s">
+        <div class="kpi-icon">👤</div>
+        <div class="kpi-label">Active Users</div>
         <div class="kpi-value" id="v-roas">—</div>
-        <div class="kpi-change down">↓ 0.3x vs prev period</div>
+        <div class="kpi-change up">↑ 18.2% vs prev period</div>
       </div>
     </div>
 
+    <!-- Charts row -->
     <div class="charts-row">
       <div class="chart-card">
         <div class="chart-header">
           <div>
-            <div class="chart-title">Sessions &amp; Conversions over time</div>
-            <div class="chart-sub">// Daily · Jan–Mar 2026</div>
+            <div class="chart-title">Sessions over time</div>
+            <div class="chart-sub">// Daily · Dec 2025 – Mar 2026</div>
           </div>
           <div class="tabs">
             <div class="tab active" onclick="switchTab(this,'sessions')">Sessions</div>
-            <div class="tab" onclick="switchTab(this,'revenue')">Revenue</div>
-            <div class="tab" onclick="switchTab(this,'cpa')">CPA</div>
+            <div class="tab" onclick="switchTab(this,'engaged')">Engaged</div>
           </div>
         </div>
-        <canvas id="lineChart" height="90"></canvas>
+        <canvas id="lineChart" height="100"></canvas>
       </div>
       <div class="chart-card">
         <div class="chart-header">
           <div>
             <div class="chart-title">Traffic Sources</div>
-            <div class="chart-sub">// By channel · sessions</div>
+            <div class="chart-sub">// By channel</div>
           </div>
-          <div class="chart-badge">GA4</div>
+          <div class="chart-badge">GA4 REAL</div>
         </div>
         <canvas id="donutChart" height="160"></canvas>
-        <div id="donut-legend" style="margin-top:16px;display:flex;flex-direction:column;gap:8px;"></div>
+        <div id="donut-legend" style="margin-top:14px;"></div>
       </div>
     </div>
 
+    <!-- Bottom row -->
     <div class="bottom-row">
-      <div class="chart-card" style="animation-delay:0.3s">
+      <div class="chart-card">
         <div class="chart-header">
           <div>
             <div class="chart-title">Channel Breakdown</div>
-            <div class="chart-sub">// Sessions · CVR · ROAS</div>
+            <div class="chart-sub">// Sessions · Engagement rate</div>
           </div>
         </div>
         <table class="channel-table">
-          <thead><tr><th>Channel</th><th>Sessions</th><th>CVR</th><th style="text-align:right">ROAS</th></tr></thead>
+          <thead>
+            <tr>
+              <th>Channel</th>
+              <th>Sessions</th>
+              <th>Eng. Rate</th>
+            </tr>
+          </thead>
           <tbody id="channel-body"></tbody>
         </table>
       </div>
-      <div class="chart-card" style="animation-delay:0.38s">
+      <div class="chart-card">
         <div class="chart-header">
           <div>
             <div class="chart-title">Top Campaigns</div>
-            <div class="chart-sub">// Ranked by revenue</div>
+            <div class="chart-sub">// Ranked by sessions</div>
           </div>
         </div>
         <div id="campaigns-list"></div>
@@ -241,11 +423,7 @@
 </div>
 
 <script>
-// ── REAL DATA: Google Analytics Demo Account ──
-// Source: Google Merchandise Store (Property ID: 213025502)
-// Period: 19 Dec 2025 – 18 Mar 2026 (90 days)
-// Data extracted manually from GA4 interface screenshots
-
+// ── DATA ──────────────────────────────────────────────────────────────────────
 const DAYS = 90;
 const labels = [];
 for(let i=0;i<DAYS;i++){
@@ -253,45 +431,36 @@ for(let i=0;i<DAYS;i++){
   labels.push(d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'}));
 }
 
-// Real daily pattern from GA4 chart: low Dec, rise Jan, peak mid-Feb ~25k/week, drop Mar
-const dailyBase = [
-  1200,1100,980,900,850,820,800,    // Dec 19-25 (holiday dip)
-  1400,1600,1800,2000,1900,1800,1700, // Dec 26 - Jan 1
-  2400,2600,2800,3000,2900,2700,2600, // Jan 2-8
-  2700,2900,3100,3300,3200,3000,2900, // Jan 9-15
-  3000,3200,3500,3700,3600,3400,3200, // Jan 16-22
-  3300,3500,3800,4000,3900,3700,3500, // Jan 23-29
-  3600,3800,4100,4300,4200,4000,3800, // Jan 30 - Feb 5
-  3900,4100,4400,4700,4600,4400,4100, // Feb 6-12 (peak period)
-  4200,4400,4600,4900,4800,4600,4300, // Feb 13-19
-  4300,4500,4700,5000,4900,4700,4400, // Feb 20-26 (highest peak)
-  3900,3700,3500,3300,3100,2900,2700, // Feb 27 - Mar 4 (drop)
-  2600,2500,2400,2300,2200,2100,2000, // Mar 5-11
-  2100,2200,2300,                      // Mar 12-14
+const dailyBase=[
+  1200,1100,980,900,850,820,800,
+  1400,1600,1800,2000,1900,1800,1700,
+  2400,2600,2800,3000,2900,2700,2600,
+  2700,2900,3100,3300,3200,3000,2900,
+  3000,3200,3500,3700,3600,3400,3200,
+  3300,3500,3800,4000,3900,3700,3500,
+  3600,3800,4100,4300,4200,4000,3800,
+  3900,4100,4400,4700,4600,4400,4100,
+  4200,4400,4600,4900,4800,4600,4300,
+  4300,4500,4700,5000,4900,4700,4400,
+  3900,3700,3500,3300,3100,2900,2700,
+  2600,2500,2400,2300,2200,2100,2000,
+  2100,2200,2300,
 ];
-const sessionsData = dailyBase.slice(0,DAYS).map(v=>Math.max(800,v+Math.round((Math.random()-0.5)*120)));
+const sessionsData = dailyBase.slice(0,DAYS).map(v=>Math.max(800,v+Math.round((Math.random()-0.5)*100)));
+const engagedData  = sessionsData.map(s=>Math.round(s*0.4595));
 
-// Engagement rate: 45.95% real from GA4
-const convData = sessionsData.map(s=>Math.round(s*0.4595));
-// Revenue based on avg session value ~$3.00 (from GA4 chart)
-const revenueData = sessionsData.map(s=>Math.round(s*2.95+Math.random()*200));
-const cpaData = revenueData.map((r,i)=>convData[i]>0?Math.round(r/convData[i]*10)/10:0);
+const totalSessions   = 226418;
+const totalEngaged    = 104029;
+const engagementRate  = 45.95;
+const totalUsers      = 164579;
 
-// EXACT totals from GA4 screenshots
-const totalSessions = 226418;   // exact from GA4
-const totalUsers = 164579;       // exact from GA4 user acquisition
-const totalNewUsers = 135310;    // exact
-const totalConv = 187398;        // exact key events
-const totalEngaged = 104029;     // engaged sessions
-const engagementRate = 45.95;    // %
-const avgEngTime = "50s";        // avg engagement time
-
-function animateCount(id,target,prefix='',suffix='',duration=1400){
+// ── KPI ANIMATION ─────────────────────────────────────────────────────────────
+function animateCount(id,target,suffix='',duration=1400){
   const el=document.getElementById(id); if(!el) return; let start=null;
   const step=ts=>{
     if(!start)start=ts;
     const p=Math.min((ts-start)/duration,1), e=1-Math.pow(1-p,3);
-    el.textContent=prefix+Math.round(e*target).toLocaleString('de-DE')+suffix;
+    el.textContent=Math.round(e*target).toLocaleString('de-DE')+suffix;
     if(p<1)requestAnimationFrame(step);
   };
   requestAnimationFrame(step);
@@ -300,7 +469,8 @@ function animateCount(id,target,prefix='',suffix='',duration=1400){
 window.addEventListener('load',()=>{
   animateCount('v-sessions', totalSessions);
   animateCount('v-conv', totalEngaged);
-  // Show engagement rate instead of revenue
+  animateCount('v-roas', totalUsers);
+  // Engagement rate
   const re=document.getElementById('v-rev'); let s=null;
   const step=ts=>{
     if(!s)s=ts; const p=Math.min((ts-s)/1400,1),e=1-Math.pow(1-p,3);
@@ -308,98 +478,159 @@ window.addEventListener('load',()=>{
     if(p<1)requestAnimationFrame(step);
   };
   requestAnimationFrame(step);
-  // Show users instead of ROAS
-  animateCount('v-roas', totalUsers);
 });
 
-// Line chart
+// ── LINE CHART ────────────────────────────────────────────────────────────────
 const ctx=document.getElementById('lineChart').getContext('2d');
-const gB=ctx.createLinearGradient(0,0,0,220); gB.addColorStop(0,'rgba(59,130,246,0.3)'); gB.addColorStop(1,'rgba(59,130,246,0)');
-const gG=ctx.createLinearGradient(0,0,0,220); gG.addColorStop(0,'rgba(16,185,129,0.3)'); gG.addColorStop(1,'rgba(16,185,129,0)');
+const gBlue=ctx.createLinearGradient(0,0,0,200);
+gBlue.addColorStop(0,'rgba(29,78,216,0.12)');
+gBlue.addColorStop(1,'rgba(29,78,216,0)');
+const gIndigo=ctx.createLinearGradient(0,0,0,200);
+gIndigo.addColorStop(0,'rgba(67,56,202,0.12)');
+gIndigo.addColorStop(1,'rgba(67,56,202,0)');
 
 const lineChart=new Chart(ctx,{
   type:'line',
   data:{labels,datasets:[
-    {label:'Sessions',data:sessionsData,borderColor:'#3b82f6',backgroundColor:gB,borderWidth:2,pointRadius:0,fill:true,tension:0.4},
-    {label:'Conversions',data:convData.map(c=>c*20),borderColor:'#10b981',backgroundColor:gG,borderWidth:2,pointRadius:0,fill:true,tension:0.4,yAxisID:'y1'}
+    {label:'Sessions', data:sessionsData, borderColor:'#1d4ed8', backgroundColor:gBlue,   borderWidth:2, pointRadius:0, fill:true, tension:0.4},
+    {label:'Engaged',  data:engagedData,  borderColor:'#4338ca', backgroundColor:gIndigo,  borderWidth:2, pointRadius:0, fill:true, tension:0.4, hidden:true}
   ]},
   options:{
     responsive:true, interaction:{mode:'index',intersect:false},
     plugins:{
       legend:{display:false},
-      tooltip:{backgroundColor:'#111827',borderColor:'rgba(255,255,255,0.08)',borderWidth:1,titleColor:'#94a3b8',bodyColor:'#f1f5f9',titleFont:{family:'JetBrains Mono',size:11},bodyFont:{family:'JetBrains Mono',size:12},
-        callbacks:{label:c=>c.datasetIndex===0?` Sessions: ${c.raw.toLocaleString()}`:` Conv: ${Math.round(c.raw/20).toLocaleString()}`}
+      tooltip:{
+        backgroundColor:'#fff',
+        borderColor:'rgba(0,0,0,0.1)', borderWidth:1,
+        titleColor:'#6b7280', bodyColor:'#1a1a1a',
+        titleFont:{family:'DM Mono',size:10},
+        bodyFont:{family:'DM Mono',size:12},
+        boxShadow:'0 4px 12px rgba(0,0,0,0.08)',
+        callbacks:{label:c=>` ${c.dataset.label}: ${c.raw.toLocaleString()}`}
       }
     },
     scales:{
-      x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#64748b',font:{family:'JetBrains Mono',size:10},maxTicksLimit:8},border:{color:'rgba(255,255,255,0.06)'}},
-      y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#64748b',font:{family:'JetBrains Mono',size:10},callback:v=>v.toLocaleString()},border:{color:'rgba(255,255,255,0.06)'}},
-      y1:{display:false}
+      x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{color:'#9ca3af',font:{family:'DM Mono',size:10},maxTicksLimit:8},border:{color:'rgba(0,0,0,0.06)'}},
+      y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{color:'#9ca3af',font:{family:'DM Mono',size:10},callback:v=>v.toLocaleString()},border:{color:'rgba(0,0,0,0.06)'}}
     }
   }
 });
 
-const datasets={sessions:sessionsData,revenue:revenueData,cpa:cpaData};
+const datasets={sessions:sessionsData,engaged:engagedData};
 window.switchTab=function(el,key){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); el.classList.add('active');
-  lineChart.data.datasets[0].data=datasets[key];
-  lineChart.data.datasets[1].hidden=key!=='sessions';
-  lineChart.options.scales.y.ticks.callback=key==='revenue'?v=>'€'+Math.round(v/1000)+'k':key==='cpa'?v=>'€'+v:v=>v.toLocaleString();
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  lineChart.data.datasets[0].hidden = key==='engaged';
+  lineChart.data.datasets[1].hidden = key==='sessions';
   lineChart.update();
 };
 
-// Donut
-// EXACT channel data from GA4 Traffic Acquisition screenshot
+// ── DONUT CHART ───────────────────────────────────────────────────────────────
 const channels=[
-  {name:'Direct',          sessions:108433, color:'#3b82f6'},
-  {name:'Organic Search',  sessions:50681,  color:'#10b981'},
-  {name:'Unassigned',      sessions:26670,  color:'#94a3b8'},
-  {name:'Paid Search',     sessions:12469,  color:'#f59e0b'},
-  {name:'Referral',        sessions:10548,  color:'#8b5cf6'},
-  {name:'Cross-network',   sessions:7063,   color:'#ef4444'},
-  {name:'Email',           sessions:6019,   color:'#06b6d4'},
+  {name:'Direct',         sessions:108433, color:'#1d4ed8'},
+  {name:'Organic Search', sessions:50681,  color:'#4338ca'},
+  {name:'Unassigned',     sessions:26670,  color:'#9ca3af'},
+  {name:'Paid Search',    sessions:12469,  color:'#6d28d9'},
+  {name:'Referral',       sessions:10548,  color:'#7c3aed'},
+  {name:'Cross-network',  sessions:7063,   color:'#2563eb'},
+  {name:'Email',          sessions:6019,   color:'#818cf8'},
 ];
+
 new Chart(document.getElementById('donutChart').getContext('2d'),{
   type:'doughnut',
-  data:{labels:channels.map(c=>c.name),datasets:[{data:channels.map(c=>c.sessions),backgroundColor:channels.map(c=>c.color+'cc'),borderColor:channels.map(c=>c.color),borderWidth:1,hoverOffset:6}]},
-  options:{cutout:'72%',plugins:{legend:{display:false},tooltip:{backgroundColor:'#111827',borderColor:'rgba(255,255,255,0.08)',borderWidth:1,titleColor:'#94a3b8',bodyColor:'#f1f5f9',titleFont:{family:'JetBrains Mono',size:11},bodyFont:{family:'JetBrains Mono',size:12},callbacks:{label:c=>`  ${c.raw.toLocaleString()} sessions`}}}}
+  data:{
+    labels:channels.map(c=>c.name),
+    datasets:[{
+      data:channels.map(c=>c.sessions),
+      backgroundColor:channels.map(c=>c.color+'cc'),
+      borderColor:channels.map(c=>c.color),
+      borderWidth:1, hoverOffset:4
+    }]
+  },
+  options:{
+    cutout:'74%',
+    plugins:{
+      legend:{display:false},
+      tooltip:{
+        backgroundColor:'#fff',
+        borderColor:'rgba(0,0,0,0.1)', borderWidth:1,
+        titleColor:'#6b7280', bodyColor:'#1a1a1a',
+        titleFont:{family:'DM Mono',size:10},
+        bodyFont:{family:'DM Mono',size:12},
+        callbacks:{label:c=>`  ${c.raw.toLocaleString()} sessions`}
+      }
+    }
+  }
 });
+
+// Legend
 const legend=document.getElementById('donut-legend');
 channels.forEach(c=>{
   const pct=Math.round(c.sessions/totalSessions*100);
-  legend.innerHTML+=`<div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;"><div style="display:flex;align-items:center;gap:8px;"><div style="width:8px;height:8px;border-radius:2px;background:${c.color};flex-shrink:0;"></div><span style="color:#94a3b8;font-family:'JetBrains Mono',monospace;">${c.name}</span></div><span style="font-family:'JetBrains Mono',monospace;font-weight:600;">${pct}%</span></div>`;
+  legend.innerHTML+=`<div class="legend-item"><div class="legend-left"><div class="legend-dot" style="background:${c.color}"></div><span class="legend-name">${c.name}</span></div><span class="legend-pct">${pct}%</span></div>`;
 });
 
-// Channel table
-// EXACT channel breakdown from GA4 Traffic Acquisition screenshot
+// ── CHANNEL TABLE ─────────────────────────────────────────────────────────────
 const chData=[
-  {name:'Direct',         color:'#3b82f6', sessions:108433, cvr:'34.59%', roas:null, ok:true},
-  {name:'Organic Search', color:'#10b981', sessions:50681,  cvr:'64.39%', roas:null, ok:true},
-  {name:'Paid Search',    color:'#f59e0b', sessions:12469,  cvr:'70.7%',  roas:null, ok:true},
-  {name:'Referral',       color:'#8b5cf6', sessions:10548,  cvr:'78.0%',  roas:null, ok:true},
-  {name:'Cross-network',  color:'#ef4444', sessions:7063,   cvr:'79.47%', roas:null, ok:true},
-  {name:'Email',          color:'#06b6d4', sessions:6019,   cvr:'77.32%', roas:null, ok:true},
+  {name:'Direct',         color:'#1d4ed8', sessions:108433, cvr:'34.59%'},
+  {name:'Organic Search', color:'#4338ca', sessions:50681,  cvr:'64.39%'},
+  {name:'Paid Search',    color:'#6d28d9', sessions:12469,  cvr:'70.70%'},
+  {name:'Referral',       color:'#7c3aed', sessions:10548,  cvr:'78.00%'},
+  {name:'Cross-network',  color:'#2563eb', sessions:7063,   cvr:'79.47%'},
+  {name:'Email',          color:'#818cf8', sessions:6019,   cvr:'77.32%'},
 ];
 const maxS=Math.max(...chData.map(c=>c.sessions));
 const tbody=document.getElementById('channel-body');
 chData.forEach(c=>{
-  const bw=Math.round(c.sessions/maxS*80);
-  tbody.innerHTML+=`<tr><td><div class="channel-name"><div class="channel-dot" style="background:${c.color}"></div>${c.name}</div></td><td><div style="display:flex;flex-direction:column;gap:4px;"><span style="font-family:'JetBrains Mono',monospace;">${c.sessions.toLocaleString()}</span><div class="bar-wrap"><div class="bar-fill" style="width:${bw}px;background:${c.color};"></div></div></div></td><td style="font-family:'JetBrains Mono',monospace;color:#94a3b8;">${c.cvr}</td><td style="text-align:right;">${c.roas?`<span class="badge-roas" style="background:${c.ok?'rgba(16,185,129,0.1)':'rgba(245,158,11,0.1)'};color:${c.ok?'#10b981':'#f59e0b'}">${c.roas}x</span>`:'<span style="color:#475569">—</span>'}</td></tr>`;
+  const bw=Math.round(c.sessions/maxS*56);
+  tbody.innerHTML+=`
+    <tr>
+      <td><div class="channel-name"><div class="channel-dot" style="background:${c.color}"></div>${c.name}</div></td>
+      <td>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <span style="font-family:'DM Mono',monospace;font-size:12px;">${c.sessions.toLocaleString()}</span>
+          <div class="bar-wrap"><div class="bar-fill" style="width:${bw}px;background:${c.color};"></div></div>
+        </div>
+      </td>
+      <td style="font-family:'DM Mono',monospace;color:#6b7280;font-size:12px;">${c.cvr}</td>
+    </tr>`;
 });
 
-// Campaigns
-// EXACT campaign data from GA4 screenshots
+// ── CAMPAIGNS ─────────────────────────────────────────────────────────────────
 const camps=[
-  {name:'[Evergreen] Merch Store',     type:'Cross-network', status:'active', rev:'7 200 rel.',  label:'Sessions'},
-  {name:'[Evergreen] Merch Store #2',  type:'Cross-network', status:'active', rev:'4 100 rel.',  label:'Sessions'},
-  {name:'Turtly Awesome Accessories',  type:'Google Ads',    status:'active', rev:'621 rel.',    label:'Sessions'},
-  {name:'Newsletter_October_2025',     type:'Email',         status:'paused', rev:'4 400 rel.',  label:'Sessions'},
-  {name:'Newsletter_November_2025',    type:'Email',         status:'paused', rev:'1 500 rel.',  label:'Sessions'},
+  {name:'[Evergreen] Merch Store',    type:'Cross-network', status:'active', sessions:'7 200'},
+  {name:'[Evergreen] Merch Store #2', type:'Cross-network', status:'active', sessions:'4 100'},
+  {name:'Turtly Awesome Accessories', type:'Google Ads',    status:'active', sessions:'621'},
+  {name:'Newsletter October 2025',    type:'Email',         status:'paused', sessions:'4 400'},
+  {name:'Newsletter November 2025',   type:'Email',         status:'paused', sessions:'1 500'},
 ];
 const cl=document.getElementById('campaigns-list');
 camps.forEach(c=>{
-  cl.innerHTML+=`<div class="campaign-item"><div><div class="campaign-name">${c.name}</div><div style="display:flex;gap:8px;margin-top:4px;align-items:center;"><span class="campaign-meta">${c.type}</span><span class="status-pill ${c.status}">${c.status}</span></div></div><div class="campaign-stat"><div class="big">${c.rev}</div><div class="small">${c.label}</div></div></div>`;
+  cl.innerHTML+=`
+    <div class="campaign-item">
+      <div>
+        <div class="campaign-name">${c.name}</div>
+        <div style="display:flex;gap:6px;margin-top:3px;align-items:center;">
+          <span class="campaign-meta">${c.type}</span>
+          <span class="status-pill ${c.status}">${c.status}</span>
+        </div>
+      </div>
+      <div class="campaign-stat">
+        <div class="big">${c.sessions}</div>
+        <div class="small">sessions</div>
+      </div>
+    </div>`;
 });
+
+// ── MOBILE SIDEBAR ────────────────────────────────────────────────────────────
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
 </script>
 </body>
 </html>
