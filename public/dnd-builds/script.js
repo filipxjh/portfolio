@@ -12,16 +12,16 @@ const classCodes = {
   };
 var klass = "";
 const classPortraits = {
-  barbarian: "images/barbarian.webp",
-  cleric: "images/cleric.png",
-  ranger: "images/ranger.png",
-  bard: "images/bard.webp",
-  wizard: "images/wizard.webp",
-  warlock: "images/warlock.webp",
-  sorcerer: "images/sorcerer.webp",
-  rogue: "images/rogue.webp",
-  druid: "images/druid.webp",
-  fighter: "images/fighter.webp",
+  barbarian: "/dnd-builds/images/barbarian.webp",
+  cleric: "/dnd-builds/images/cleric.png",
+  ranger: "/dnd-builds/images/ranger.png",
+  bard: "/dnd-builds/images/bard.webp",
+  wizard: "/dnd-builds/images/wizard.webp",
+  warlock: "/dnd-builds/images/warlock.webp",
+  sorcerer: "/dnd-builds/images/sorcerer.webp",
+  rogue: "/dnd-builds/images/rogue.webp",
+  druid: "/dnd-builds/images/druid.webp",
+  fighter: "/dnd-builds/images/fighter.webp",
 };
 
 function resetGearSlots() {
