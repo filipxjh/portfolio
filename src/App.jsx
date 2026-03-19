@@ -127,7 +127,7 @@ function useInView(threshold = 0.15) {
 // ── XJH LOGO ──────────────────────────────────────────────────────────────────
 
 function KusnirLogo({ dark = true }) {
-  const color = dark ? "#1a1a1a" : "#fcfaf7";
+  const color = dark ? "#1a1a1a" : "#f5f5f5";
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
       <span style={{
@@ -173,20 +173,20 @@ function Nav({ active, setActive }) {
         position: "fixed", top: 0, left: 0, right: 0, zIndex: 200,
         height: 60, display: "flex", alignItems: "center", justifyContent: "space-between",
         padding: "0 5vw", position: "fixed",
-        background: scrolled ? "rgba(252,250,247,0.96)" : "transparent",
+        background: scrolled ? "rgba(252,250,247,0.96)" : "rgba(14,14,14,0)",
         backdropFilter: scrolled ? "blur(12px)" : "none",
         borderBottom: scrolled ? "1px solid rgba(0,0,0,0.06)" : "none",
         transition: "all 0.3s ease",
       }}>
         {/* Logo left */}
         <a href="#about" onClick={() => handleLink("about")} style={{ textDecoration: "none", display: "flex", alignItems: "center", minWidth: 100 }}>
-          <KusnirLogo dark={true} />
+          <KusnirLogo dark={scrolled} />
         </a>
         {/* Nav center */}
         <div className="nav-desktop" style={{ display: "flex", gap: 2, position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
           {NAV_LINKS.map(l => (
             <a key={l.href} href={`#${l.href}`} onClick={() => handleLink(l.href)}
-              style={{ padding: "6px 14px", fontSize: 13, textDecoration: "none", color: active === l.href ? "#1a1a1a" : "#888", fontWeight: active === l.href ? 600 : 400, borderBottom: active === l.href ? "1.5px solid #1a1a1a" : "1.5px solid transparent", transition: "all 0.15s", whiteSpace: "nowrap" }}
+              style={{ padding: "6px 14px", fontSize: 13, textDecoration: "none", color: scrolled ? (active === l.href ? "#1a1a1a" : "#888") : (active === l.href ? "#fff" : "rgba(255,255,255,0.6)"), fontWeight: active === l.href ? 600 : 400, borderBottom: active === l.href ? `1.5px solid ${scrolled ? '#1a1a1a' : '#fff'}` : "1.5px solid transparent", transition: "all 0.15s", whiteSpace: "nowrap" }}
               onMouseEnter={e => { if (active !== l.href) e.currentTarget.style.color = "#1a1a1a"; }}
               onMouseLeave={e => { if (active !== l.href) e.currentTarget.style.color = "#888"; }}
             >{l.label}</a>
@@ -228,59 +228,126 @@ function Ticker() {
   );
 }
 
+// ── NEURAL NETWORK CANVAS BACKGROUND ─────────────────────────────────────────
+
+function NeuralBackground() {
+  const canvasRef = useRef(null);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let animId;
+    let nodes = [];
+    const N = 55;
+    const MAX_DIST = 160;
+
+    const resize = () => {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    for (let i = 0; i < N; i++) {
+      nodes.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: (Math.random() - 0.5) * 0.35,
+        r: Math.random() * 2 + 1,
+      });
+    }
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      nodes.forEach(n => {
+        n.x += n.vx; n.y += n.vy;
+        if (n.x < 0 || n.x > canvas.width)  n.vx *= -1;
+        if (n.y < 0 || n.y > canvas.height) n.vy *= -1;
+      });
+      // Lines
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const dx = nodes[i].x - nodes[j].x;
+          const dy = nodes[i].y - nodes[j].y;
+          const d = Math.sqrt(dx*dx + dy*dy);
+          if (d < MAX_DIST) {
+            const alpha = (1 - d / MAX_DIST) * 0.18;
+            ctx.beginPath();
+            ctx.moveTo(nodes[i].x, nodes[i].y);
+            ctx.lineTo(nodes[j].x, nodes[j].y);
+            ctx.strokeStyle = `rgba(99,132,255,${alpha})`;
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+          }
+        }
+      }
+      // Dots
+      nodes.forEach(n => {
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(120,150,255,0.4)';
+        ctx.fill();
+      });
+      animId = requestAnimationFrame(draw);
+    };
+    draw();
+    return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', resize); };
+  }, []);
+  return <canvas ref={canvasRef} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 1 }} />;
+}
+
 // ── HERO ──────────────────────────────────────────────────────────────────────
 
 function Hero() {
   const [mounted, setMounted] = useState(false);
-  useEffect(() => { setTimeout(() => setMounted(true), 80); }, []);
+  useEffect(() => { setTimeout(() => setMounted(true), 100); }, []);
   return (
-    <section id="about" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 5vw", background: "#fcfaf7", position: "relative", overflow: "hidden" }}>
-      {/* Grain texture overlay */}
-      <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 2, opacity: 0.55, backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23grain)' opacity='0.25'/%3E%3C/svg%3E")`, backgroundRepeat: "repeat" }} />
-      {/* Subtle animated gradient blobs */}
-      <div style={{ position: "absolute", top: "15%", right: "5%", width: 420, height: 420, borderRadius: "50%", background: "radial-gradient(circle, rgba(29,78,216,0.09) 0%, transparent 70%)", pointerEvents: "none", animation: "blobFloat 8s ease-in-out infinite" }} />
-      <div style={{ position: "absolute", bottom: "10%", left: "0%", width: 500, height: 360, borderRadius: "50%", background: "radial-gradient(circle, rgba(109,40,217,0.07) 0%, transparent 70%)", pointerEvents: "none", animation: "blobFloat 11s ease-in-out infinite reverse" }} />
-      <div style={{ position: "absolute", top: "55%", left: "40%", width: 280, height: 280, borderRadius: "50%", background: "radial-gradient(circle, rgba(67,56,202,0.06) 0%, transparent 70%)", pointerEvents: "none", animation: "blobFloat 14s ease-in-out infinite 2s" }} />
+    <section id="about" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "space-between", background: "#0e0e0e", position: "relative", overflow: "hidden" }}>
+      {/* Neural network */}
+      <NeuralBackground />
+      {/* Grain */}
+      <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 2, backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)' opacity='0.04'/%3E%3C/svg%3E")`, backgroundRepeat: "repeat" }} />
+      {/* Blue gradient top-right */}
+      <div style={{ position: "absolute", top: "-10%", right: "-5%", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(29,78,216,0.18) 0%, transparent 65%)", pointerEvents: "none", zIndex: 1 }} />
+      <div style={{ position: "absolute", bottom: "0%", left: "-10%", width: 600, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(109,40,217,0.1) 0%, transparent 65%)", pointerEvents: "none", zIndex: 1 }} />
 
-      <div style={{ maxWidth: 900, margin: "0 auto", paddingTop: 80, width: "100%", position: "relative", transition: "opacity 0.9s, transform 0.9s", opacity: mounted ? 1 : 0, transform: mounted ? "none" : "translateY(24px)" }}>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 14px", border: "1px solid rgba(0,0,0,0.08)", marginBottom: 40, background: "#fff" }}>
-          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#22c55e", display: "block", flexShrink: 0 }} />
-          <span style={{ fontSize: 11.5, color: "#555", letterSpacing: 1.5, textTransform: "uppercase", fontFamily: "'DM Mono', monospace" }}>Dostupný pre pracovné príležitosti</span>
+      {/* Main headline - vertically centered */}
+      <div style={{ flex: 1, display: "flex", alignItems: "center", padding: "0 6vw", position: "relative", zIndex: 3 }}>
+        <div style={{ transition: "opacity 1s, transform 1s", opacity: mounted ? 1 : 0, transform: mounted ? "none" : "translateY(30px)", width: "100%" }}>
+          <h1 style={{
+            fontSize: "clamp(48px, 8vw, 110px)",
+            fontWeight: 900,
+            lineHeight: 1.0,
+            margin: 0,
+            color: "#f5f5f5",
+            letterSpacing: "-3px",
+            fontFamily: "'Montserrat', sans-serif",
+            maxWidth: "90vw",
+          }}>
+            Dáta. Kampane.<br />
+            <span style={{ color: "transparent", WebkitTextStroke: "2px rgba(255,255,255,0.25)" }}>Výsledky.</span>
+          </h1>
         </div>
+      </div>
 
-        <h1 style={{ fontSize: "clamp(52px, 9vw, 96px)", fontWeight: 800, lineHeight: 0.95, margin: "0 0 28px", color: "#1a1a1a", letterSpacing: -4, fontFamily: "'Montserrat', sans-serif" }}>
-          Filip<br />
-          <span style={{ position: "relative", display: "inline-block" }}>
-            Kušnír
-            <span style={{ position: "absolute", bottom: 4, left: 0, right: 0, height: 6, background: "linear-gradient(90deg, #1d4ed8, #6d28d9)", opacity: 0.3, zIndex: -1 }} />
-          </span>
-        </h1>
-
-        <p style={{ fontSize: "clamp(16px, 2vw, 20px)", color: "#555", marginBottom: 18, fontWeight: 400, letterSpacing: -0.2 }}>
-          Marketing analytik & výkonnostný marketing
-        </p>
-
-        <p style={{ fontSize: 15.5, color: "#888", maxWidth: 500, lineHeight: 1.8, marginBottom: 40 }}>
-          Študujem digitálny manažment na UK Bratislava. Zaujíma ma priestor kde sa stretávajú dáta, kampane a reálne obchodné výsledky — nie len štatistiky pre štatistiky.
-        </p>
-
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 48 }}>
-          {CERTIFICATIONS.map(c => (
-            <span key={c.name} style={{ fontSize: 11.5, padding: "5px 12px", border: "1px solid rgba(0,0,0,0.1)", color: "#555", background: "#fff", fontFamily: "'DM Mono', monospace" }}>
-              {c.name} · {c.issuer}
-            </span>
-          ))}
+      {/* Bottom bar */}
+      <div style={{ position: "relative", zIndex: 3, borderTop: "1px solid rgba(255,255,255,0.08)", padding: "20px 6vw", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16, transition: "opacity 1s 0.4s", opacity: mounted ? 1 : 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#22c55e", display: "block", animation: "pulse 2s infinite" }} />
+          <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", letterSpacing: 2, textTransform: "uppercase", fontFamily: "'DM Mono', monospace" }}>Junior analytik · Bratislava · Dostupný</span>
         </div>
-
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-          <a href="#projects" style={{ padding: "13px 28px", background: "#1a1a1a", color: "#fcfaf7", fontWeight: 600, textDecoration: "none", fontSize: 14, transition: "background 0.2s" }}
-            onMouseEnter={e => e.currentTarget.style.background = "#333"}
-            onMouseLeave={e => e.currentTarget.style.background = "#1a1a1a"}>
+        <div style={{ display: "flex", gap: 10 }}>
+          <a href="#projects"
+            style={{ padding: "11px 26px", background: "#fff", color: "#0e0e0e", fontWeight: 700, textDecoration: "none", fontSize: 13, letterSpacing: 0.3, transition: "all 0.2s" }}
+            onMouseEnter={e => { e.currentTarget.style.background = "#1d4ed8"; e.currentTarget.style.color = "#fff"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "#fff"; e.currentTarget.style.color = "#0e0e0e"; }}>
             Zobraziť projekty
           </a>
-          <a href="#contact" style={{ padding: "13px 28px", border: "1px solid rgba(0,0,0,0.15)", color: "#1a1a1a", fontWeight: 500, textDecoration: "none", fontSize: 14, background: "transparent", transition: "background 0.2s" }}
-            onMouseEnter={e => e.currentTarget.style.background = "rgba(0,0,0,0.04)"}
-            onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+          <a href="#contact"
+            style={{ padding: "11px 26px", border: "1px solid rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.8)", fontWeight: 500, textDecoration: "none", fontSize: 13, transition: "all 0.2s" }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.6)"; e.currentTarget.style.color = "#fff"; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)"; e.currentTarget.style.color = "rgba(255,255,255,0.8)"; }}>
             Kontakt
           </a>
         </div>
@@ -415,30 +482,84 @@ function ProjectModal({ project, onClose }) {
 
 function ProjectCard({ project: p, onPreview }) {
   const [hovered, setHovered] = useState(false);
+  const [iframeLoaded, setIframeLoaded] = useState(false);
   const [ref, inView] = useInView(0.1);
+
   return (
     <div ref={ref} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
-      style={{ border: "1px solid rgba(0,0,0,0.07)", padding: "32px 28px", background: hovered ? "#fff" : "#fcfaf7", transition: "all 0.22s", transform: inView ? "none" : "translateY(14px)", opacity: inView ? 1 : 0 }}>
-      <div style={{ fontSize: 11, color: "#bbb", textTransform: "uppercase", letterSpacing: 2, fontFamily: "'DM Mono', monospace", marginBottom: 14 }}>{p.type}</div>
-      <h3 style={{ color: "#1a1a1a", fontSize: 20, fontWeight: 700, margin: "0 0 12px", letterSpacing: -0.5, fontFamily: "'Montserrat', sans-serif" }}>{p.title}</h3>
-      <p style={{ color: "#777", fontSize: 14, lineHeight: 1.75, margin: "0 0 22px" }}>{p.description}</p>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 22 }}>
-        {p.tags.map(tag => (
-          <span key={tag} style={{ fontSize: 11, padding: "4px 10px", border: "1px solid rgba(0,0,0,0.08)", color: "#666", fontFamily: "'DM Mono', monospace" }}>{tag}</span>
-        ))}
+      style={{ border: "1px solid rgba(0,0,0,0.07)", background: "#fff", transition: "all 0.25s", transform: inView ? (hovered ? "translateY(-4px)" : "none") : "translateY(16px)", opacity: inView ? 1 : 0, boxShadow: hovered ? "0 12px 40px rgba(0,0,0,0.1)" : "0 2px 8px rgba(0,0,0,0.04)", overflow: "hidden" }}>
+
+      {/* iframe preview window */}
+      <div style={{ position: "relative", height: 220, overflow: "hidden", background: "#f5f5f5", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+        {/* Browser chrome bar */}
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 28, background: "#ececec", borderBottom: "1px solid rgba(0,0,0,0.08)", display: "flex", alignItems: "center", gap: 5, padding: "0 10px", zIndex: 2, flexShrink: 0 }}>
+          <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#ff5f57" }} />
+          <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#febc2e" }} />
+          <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#28c840" }} />
+          <span style={{ flex: 1, background: "#fff", height: 16, borderRadius: 3, marginLeft: 6, maxWidth: 180, fontSize: 9, color: "#aaa", display: "flex", alignItems: "center", paddingLeft: 6, fontFamily: "monospace" }}>{p.liveUrl}</span>
+        </div>
+        {/* iframe scaled down */}
+        {inView && (
+          <iframe
+            src={p.liveUrl}
+            title={p.title}
+            onLoad={() => setIframeLoaded(true)}
+            scrolling="no"
+            style={{
+              position: "absolute", top: 28, left: 0,
+              width: "170%", height: "220%",
+              border: "none",
+              transform: "scale(0.588)",
+              transformOrigin: "0 0",
+              pointerEvents: "none",
+              opacity: iframeLoaded ? 1 : 0,
+              transition: "opacity 0.4s",
+            }}
+          />
+        )}
+        {!iframeLoaded && (
+          <div style={{ position: "absolute", top: 28, left: 0, right: 0, bottom: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 8 }}>
+            <div style={{ width: 20, height: 20, border: "2px solid #1d4ed8", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+            <span style={{ fontSize: 10, color: "#aaa", fontFamily: "monospace" }}>Loading preview...</span>
+          </div>
+        )}
+        {/* Hover overlay - click to expand */}
+        <div onClick={onPreview}
+          style={{ position: "absolute", inset: 0, background: hovered ? "rgba(29,78,216,0.08)" : "transparent", transition: "background 0.2s", cursor: "pointer", zIndex: 3, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          {hovered && (
+            <div style={{ background: "#1a1a1a", color: "#fff", padding: "8px 18px", fontSize: 12, fontWeight: 600, letterSpacing: 0.5, animation: "fadeIn 0.15s ease" }}>
+              ↗ Rozšíriť
+            </div>
+          )}
+        </div>
       </div>
-      <div style={{ display: "flex", gap: 8 }}>
-        <button onClick={onPreview} style={{ flex: 1, padding: "11px 0", background: "#1a1a1a", border: "none", color: "#fff", fontWeight: 600, fontSize: 13, cursor: "pointer", transition: "background 0.18s" }}
-          onMouseEnter={e => e.currentTarget.style.background = "#333"}
-          onMouseLeave={e => e.currentTarget.style.background = "#1a1a1a"}>
-          Live Preview
-        </button>
-        <a href={p.githubUrl} target="_blank" rel="noopener noreferrer"
-          style={{ padding: "11px 16px", border: "1px solid rgba(0,0,0,0.1)", color: "#666", textDecoration: "none", fontSize: 13, display: "flex", alignItems: "center", transition: "all 0.15s" }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = "#1a1a1a"; e.currentTarget.style.color = "#1a1a1a"; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(0,0,0,0.1)"; e.currentTarget.style.color = "#666"; }}>
-          GitHub
-        </a>
+
+      {/* Card info */}
+      <div style={{ padding: "20px 22px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+          <div style={{ fontSize: 10, color: "#bbb", textTransform: "uppercase", letterSpacing: 2, fontFamily: "'DM Mono', monospace" }}>{p.type}</div>
+        </div>
+        <h3 style={{ color: "#1a1a1a", fontSize: 17, fontWeight: 700, margin: "0 0 8px", letterSpacing: -0.3, fontFamily: "'Montserrat', sans-serif" }}>{p.title}</h3>
+        <p style={{ color: "#888", fontSize: 13, lineHeight: 1.7, margin: "0 0 16px" }}>{p.description}</p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 16 }}>
+          {p.tags.map(tag => (
+            <span key={tag} style={{ fontSize: 10.5, padding: "3px 9px", border: "1px solid rgba(0,0,0,0.08)", color: "#666", fontFamily: "'DM Mono', monospace" }}>{tag}</span>
+          ))}
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button onClick={onPreview}
+            style={{ flex: 1, padding: "10px 0", background: "#1a1a1a", border: "none", color: "#fff", fontWeight: 600, fontSize: 12.5, cursor: "pointer", transition: "background 0.18s", letterSpacing: 0.3 }}
+            onMouseEnter={e => e.currentTarget.style.background = "#1d4ed8"}
+            onMouseLeave={e => e.currentTarget.style.background = "#1a1a1a"}>
+            Live Preview
+          </button>
+          <a href={p.githubUrl} target="_blank" rel="noopener noreferrer"
+            style={{ padding: "10px 14px", border: "1px solid rgba(0,0,0,0.1)", color: "#666", textDecoration: "none", fontSize: 12.5, display: "flex", alignItems: "center", transition: "all 0.15s" }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = "#1a1a1a"; e.currentTarget.style.color = "#1a1a1a"; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(0,0,0,0.1)"; e.currentTarget.style.color = "#666"; }}>
+            GitHub
+          </a>
+        </div>
       </div>
     </div>
   );
@@ -575,6 +696,7 @@ export default function App() {
         @keyframes spin { to{transform:rotate(360deg)} }
         @keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
         @keyframes blobFloat { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(20px,-15px) scale(1.04)} 66%{transform:translate(-10px,20px) scale(0.97)} }
+        @keyframes pulse { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(34,197,94,0.4)} 50%{opacity:0.8;box-shadow:0 0 0 4px rgba(34,197,94,0)} }
 
         @media (max-width: 768px) {
           .nav-desktop { display: none !important; }
@@ -591,7 +713,6 @@ export default function App() {
       `}</style>
       <Nav active={activeNav} setActive={setActiveNav} />
       <Hero />
-      <Ticker />
       <ExperienceSection />
       <SkillsSection />
       <ProjectsSection />
