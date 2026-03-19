@@ -312,45 +312,47 @@ function Hero() {
       <div style={{ position: "absolute", top: "-10%", right: "-5%", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(29,78,216,0.18) 0%, transparent 65%)", pointerEvents: "none", zIndex: 1 }} />
       <div style={{ position: "absolute", bottom: "0%", left: "-10%", width: 600, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(109,40,217,0.1) 0%, transparent 65%)", pointerEvents: "none", zIndex: 1 }} />
 
-      {/* Main headline - vertically centered */}
-      <div style={{ flex: 1, display: "flex", alignItems: "center", padding: "0 6vw", position: "relative", zIndex: 3 }}>
+      {/* Main content - vertically centered */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 6vw", position: "relative", zIndex: 3, textAlign: "center" }}>
         <div style={{ transition: "opacity 1s, transform 1s", opacity: mounted ? 1 : 0, transform: mounted ? "none" : "translateY(30px)", width: "100%" }}>
           <h1 style={{
             fontSize: "clamp(48px, 8vw, 110px)",
             fontWeight: 900,
             lineHeight: 1.0,
-            margin: 0,
+            margin: "0 0 48px",
             color: "#f5f5f5",
             letterSpacing: "-3px",
             fontFamily: "'Montserrat', sans-serif",
-            maxWidth: "90vw",
           }}>
-            Dáta. Kampane.<br />
-            <span style={{ color: "transparent", WebkitTextStroke: "2px rgba(255,255,255,0.25)" }}>Výsledky.</span>
+            Data Driven Marketer<br />
+            <span style={{ color: "transparent", WebkitTextStroke: "2px rgba(255,255,255,0.25)" }}>Junior</span>
           </h1>
+
+          {/* CTA buttons - centered, bigger */}
+          <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
+            <a href="#projects"
+              style={{ padding: "16px 40px", background: "#fff", color: "#0e0e0e", fontWeight: 700, textDecoration: "none", fontSize: 15, letterSpacing: 0.3, transition: "all 0.2s" }}
+              onMouseEnter={e => { e.currentTarget.style.background = "#1d4ed8"; e.currentTarget.style.color = "#fff"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "#fff"; e.currentTarget.style.color = "#0e0e0e"; e.currentTarget.style.transform = "none"; }}>
+              Zobraziť projekty
+            </a>
+            <a href="#contact"
+              style={{ padding: "16px 40px", border: "1.5px solid rgba(255,255,255,0.25)", color: "rgba(255,255,255,0.85)", fontWeight: 600, textDecoration: "none", fontSize: 15, transition: "all 0.2s" }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.7)"; e.currentTarget.style.color = "#fff"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.25)"; e.currentTarget.style.color = "rgba(255,255,255,0.85)"; e.currentTarget.style.transform = "none"; }}>
+              Kontakt
+            </a>
+          </div>
         </div>
       </div>
 
       {/* Bottom bar */}
-      <div style={{ position: "relative", zIndex: 3, borderTop: "1px solid rgba(255,255,255,0.08)", padding: "20px 6vw", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16, transition: "opacity 1s 0.4s", opacity: mounted ? 1 : 0 }}>
+      <div style={{ position: "relative", zIndex: 3, borderTop: "1px solid rgba(255,255,255,0.06)", padding: "18px 6vw", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, transition: "opacity 1s 0.6s", opacity: mounted ? 1 : 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#22c55e", display: "block", animation: "pulse 2s infinite" }} />
-          <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", letterSpacing: 2, textTransform: "uppercase", fontFamily: "'DM Mono', monospace" }}>Junior analytik · Bratislava · Dostupný</span>
+          <span style={{ fontSize: 10.5, color: "rgba(255,255,255,0.35)", letterSpacing: 2, textTransform: "uppercase", fontFamily: "'DM Mono', monospace" }}>Junior analytik · Bratislava · Dostupný</span>
         </div>
-        <div style={{ display: "flex", gap: 10 }}>
-          <a href="#projects"
-            style={{ padding: "11px 26px", background: "#fff", color: "#0e0e0e", fontWeight: 700, textDecoration: "none", fontSize: 13, letterSpacing: 0.3, transition: "all 0.2s" }}
-            onMouseEnter={e => { e.currentTarget.style.background = "#1d4ed8"; e.currentTarget.style.color = "#fff"; }}
-            onMouseLeave={e => { e.currentTarget.style.background = "#fff"; e.currentTarget.style.color = "#0e0e0e"; }}>
-            Zobraziť projekty
-          </a>
-          <a href="#contact"
-            style={{ padding: "11px 26px", border: "1px solid rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.8)", fontWeight: 500, textDecoration: "none", fontSize: 13, transition: "all 0.2s" }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.6)"; e.currentTarget.style.color = "#fff"; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)"; e.currentTarget.style.color = "rgba(255,255,255,0.8)"; }}>
-            Kontakt
-          </a>
-        </div>
+        <span style={{ fontSize: 10.5, color: "rgba(255,255,255,0.2)", letterSpacing: 1, fontFamily: "'DM Mono', monospace" }}>Filip Kušnír · 2026</span>
       </div>
     </section>
   );
