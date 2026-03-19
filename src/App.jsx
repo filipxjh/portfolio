@@ -400,7 +400,7 @@ function ExperienceSection() {
             {EDUCATION.map((e, i) => (
               <div key={e.school} style={{ borderLeft: `3px solid ${["#1d4ed8","#4338ca","#6d28d9"][i]}`, paddingLeft: 24, marginBottom: 28 }}>
                 <div style={{ fontWeight: 600, color: "#1a1a1a", fontSize: 14, marginBottom: 3 }}>{e.school}</div>
-                <div style={{ fontSize: 13, color: "#555", marginBottom: 3 }}>{e.degree} — {e.field}</div>
+                <div style={{ fontSize: 13, color: "#555", marginBottom: 3 }}>{e.degree} - {e.field}</div>
                 <div style={{ fontSize: 11, color: "#bbb", fontFamily: "'DM Mono', monospace" }}>{e.period}</div>
               </div>
             ))}
