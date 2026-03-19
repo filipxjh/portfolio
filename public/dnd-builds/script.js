@@ -10,12 +10,7 @@ const classCodes = {
     druid: 256,
     sorcerer: 512,
   };
-var klass = "";{
-// window.onload removed - handled by index.html
-// function() {
-    // FighterStart();
-    
-  };
+var klass = "";
 const classPortraits = {
   barbarian: "/dnd-builds/images/barbarian.webp",
   cleric: "/dnd-builds/images/cleric.png",
