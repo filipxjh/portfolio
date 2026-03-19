@@ -1,13 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { useTranslation } from "react-i18next";
 
-const NAV_LINKS = [
-  { key: "about",       href: "about" },
-  { key: "skills",      href: "skills" },
-  { key: "projects",    href: "projects" },
-  { key: "caseStudies", href: "case-studies" },
-  { key: "contact",     href: "contact" },
-];
+const NAV_LINKS = ["About", "Skills", "Projects", "Case Studies", "Contact"];
 
 const SKILLS = [
   { category: "Analytics & Data", items: ["Google Analytics 4", "Looker Studio", "BigQuery", "Python (pandas)", "SQL"], color: "#00f5c4" },
@@ -23,6 +16,7 @@ const METRICS = [
   { value: "12+", label: "Campaigns Optimized", icon: "⬡" },
 ];
 
+// ← Vymeň URL za svoje GitHub Pages / Vercel linky po nasadení
 const LIVE_PROJECTS = [
   {
     id: "dashboard",
@@ -34,7 +28,7 @@ const LIVE_PROJECTS = [
     description: "Interactive marketing analytics dashboard visualizing campaign performance across channels. Displays KPIs, traffic sources, channel breakdown and top campaigns with animated charts.",
     color: "#00f5c4",
     liveUrl: "/dashboard",
-    githubUrl: "https://github.com/filipxjh/portfolio",
+    githubUrl: "https://github.com/yourusername/ga4-dashboard",
   },
   {
     id: "dnd",
@@ -46,7 +40,7 @@ const LIVE_PROJECTS = [
     description: "Full-stack web application fetching and processing structured data from an external REST API. Users can dynamically filter, combine and save data configurations with real-time updates.",
     color: "#7b61ff",
     liveUrl: "/dnd-builds",
-    githubUrl: "https://github.com/filipxjh/portfolio",
+    githubUrl: "https://github.com/yourusername/api-web-app",
   },
 ];
 
@@ -121,12 +115,16 @@ function ProjectModal({ project, onClose }) {
       padding: 20, animation: "fadeIn 0.2s ease",
     }}>
       <div onClick={e => e.stopPropagation()} style={{
-        width: "100%", maxWidth: 1100, background: "#0d1220",
-        border: `1px solid ${project.color}33`, borderRadius: 20, overflow: "hidden",
-        display: "flex", flexDirection: "column", maxHeight: "90vh",
+        width: "100%", maxWidth: 1100,
+        background: "#0d1220",
+        border: `1px solid ${project.color}33`,
+        borderRadius: 20, overflow: "hidden",
+        display: "flex", flexDirection: "column",
+        maxHeight: "90vh",
         animation: "slideUp 0.25s ease",
         boxShadow: `0 40px 100px rgba(0,0,0,0.7), 0 0 0 1px ${project.color}18`,
       }}>
+        {/* Header */}
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "16px 24px", borderBottom: `1px solid ${project.color}20`,
@@ -163,12 +161,17 @@ function ProjectModal({ project, onClose }) {
             >✕</button>
           </div>
         </div>
+
+        {/* Preview area */}
         <div style={{ flex: 1, position: "relative", minHeight: 500, background: "#060810" }}>
           {isPlaceholder ? (
             <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16 }}>
               <div style={{ width: 60, height: 60, borderRadius: 14, background: `${project.color}18`, border: `1px solid ${project.color}40`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26 }}>🔗</div>
               <div style={{ textAlign: "center" }}>
                 <div style={{ color: "#fff", fontWeight: 700, fontSize: 16, marginBottom: 8 }}>Live preview bude tu</div>
+                <div style={{ color: "#64748b", fontSize: 13, fontFamily: "monospace", maxWidth: 340, lineHeight: 1.6 }}>
+                  Nahraď <code style={{ color: project.color }}>YOUR_..._URL_HERE</code> v kóde<br />za tvoj GitHub Pages alebo Vercel link
+                </div>
               </div>
             </div>
           ) : (
@@ -184,9 +187,11 @@ function ProjectModal({ project, onClose }) {
             </>
           )}
         </div>
+
+        {/* Tags */}
         <div style={{ padding: "12px 24px", borderTop: `1px solid ${project.color}20`, background: "#080c14", display: "flex", gap: 8, flexWrap: "wrap", flexShrink: 0 }}>
-          {project.tags.map(tag => (
-            <span key={tag} style={{ fontSize: 12, padding: "4px 10px", borderRadius: 12, background: `${project.color}11`, color: project.color, border: `1px solid ${project.color}22`, fontFamily: "monospace" }}>{tag}</span>
+          {project.tags.map(t => (
+            <span key={t} style={{ fontSize: 12, padding: "4px 10px", borderRadius: 12, background: `${project.color}11`, color: project.color, border: `1px solid ${project.color}22`, fontFamily: "monospace" }}>{t}</span>
           ))}
         </div>
       </div>
@@ -239,18 +244,14 @@ function SectionHeader({ label, title, inView, centered = false }) {
   );
 }
 
-// ---- NAV ----
+// ---- SECTIONS ----
 function Nav({ active, setActive }) {
-  const { t, i18n } = useTranslation();
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", h);
     return () => window.removeEventListener("scroll", h);
   }, []);
-
-  const toggleLang = () => i18n.changeLanguage(i18n.language === "sk" ? "en" : "sk");
-
   return (
     <nav style={{
       position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
@@ -267,35 +268,23 @@ function Nav({ active, setActive }) {
         </div>
         <span style={{ color: "#fff", fontWeight: 700, letterSpacing: 1, fontSize: 15 }}>Filip Kušnír</span>
       </div>
-      <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+      <div style={{ display: "flex", gap: 4 }}>
         {NAV_LINKS.map(l => (
-          <a key={l.key} href={`#${l.href}`} onClick={() => setActive(l.key)} style={{
+          <a key={l} href={`#${l.toLowerCase().replace(" ", "-")}`} onClick={() => setActive(l)} style={{
             padding: "6px 14px", borderRadius: 8, fontSize: 13,
-            color: active === l.key ? "#00f5c4" : "#8899aa",
-            background: active === l.key ? "rgba(0,245,196,0.08)" : "transparent",
-            textDecoration: "none", transition: "all 0.2s", fontWeight: active === l.key ? 600 : 400,
-          }}>{t(`nav.${l.key}`)}</a>
+            color: active === l ? "#00f5c4" : "#8899aa",
+            background: active === l ? "rgba(0,245,196,0.08)" : "transparent",
+            textDecoration: "none", transition: "all 0.2s", fontWeight: active === l ? 600 : 400,
+          }}>{l}</a>
         ))}
-        <button onClick={toggleLang} style={{
-          marginLeft: 8, padding: "6px 12px", borderRadius: 8,
-          border: "1px solid rgba(0,245,196,0.3)", background: "rgba(0,245,196,0.06)",
-          color: "#00f5c4", fontSize: 12, fontWeight: 700,
-          cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s",
-        }}
-          onMouseEnter={e => { e.target.style.background = "rgba(0,245,196,0.15)"; }}
-          onMouseLeave={e => { e.target.style.background = "rgba(0,245,196,0.06)"; }}
-        >{i18n.language === "sk" ? "EN" : "SK"}</button>
       </div>
     </nav>
   );
 }
 
-// ---- SECTIONS ----
 function Hero() {
-  const { t } = useTranslation();
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setTimeout(() => setMounted(true), 100); }, []);
-  const tags = ["GA4", "Google Ads", "Meta Ads", "BigQuery", "Looker Studio", "JavaScript", "REST API", "GTM", "Attribution Modeling"];
   return (
     <section id="about" style={{ minHeight: "100vh", display: "flex", alignItems: "center", padding: "0 5vw", position: "relative", overflow: "hidden" }}>
       <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(0,245,196,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,245,196,0.04) 1px, transparent 1px)", backgroundSize: "60px 60px", pointerEvents: "none" }} />
@@ -304,25 +293,27 @@ function Hero() {
         <div style={{ transition: "opacity 0.8s, transform 0.8s", opacity: mounted ? 1 : 0, transform: mounted ? "none" : "translateY(30px)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
             <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#00f5c4", boxShadow: "0 0 12px #00f5c4", animation: "pulse 2s infinite" }} />
-            <span style={{ color: "#00f5c4", fontSize: 13, letterSpacing: 3, textTransform: "uppercase", fontFamily: "monospace" }}>{t("hero.available")}</span>
+            <span style={{ color: "#00f5c4", fontSize: 13, letterSpacing: 3, textTransform: "uppercase", fontFamily: "monospace" }}>Available for projects</span>
           </div>
           <h1 style={{ fontSize: "clamp(42px, 7vw, 80px)", fontWeight: 900, lineHeight: 1.05, margin: "0 0 20px", color: "#fff", letterSpacing: -2 }}>
-            {t("hero.title1")}<br />
-            <span style={{ background: "linear-gradient(90deg, #00f5c4, #7b61ff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{t("hero.title2")}</span>
+            Data-Driven<br />
+            <span style={{ background: "linear-gradient(90deg, #00f5c4, #7b61ff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Marketing Analyst</span>
           </h1>
-          <p style={{ fontSize: 18, color: "#8899aa", maxWidth: 580, lineHeight: 1.7, marginBottom: 40 }}>{t("hero.description")}</p>
+          <p style={{ fontSize: 18, color: "#8899aa", maxWidth: 580, lineHeight: 1.7, marginBottom: 40 }}>
+            I turn marketing data into decisions. Specializing in GA4, performance marketing attribution, and building dashboards that actually make sense.
+          </p>
           <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
             <a href="#projects" style={{ padding: "14px 32px", borderRadius: 10, background: "#00f5c4", color: "#080a10", fontWeight: 700, textDecoration: "none", fontSize: 15, transition: "transform 0.2s, box-shadow 0.2s" }}
               onMouseEnter={e => { e.target.style.transform = "translateY(-2px)"; e.target.style.boxShadow = "0 8px 32px rgba(0,245,196,0.4)"; }}
               onMouseLeave={e => { e.target.style.transform = "none"; e.target.style.boxShadow = "none"; }}>
-              {t("hero.viewProjects")}
+              View Projects →
             </a>
-            <a href="#contact" style={{ padding: "14px 32px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontWeight: 600, textDecoration: "none", fontSize: 15 }}>{t("hero.getInTouch")}</a>
+            <a href="#contact" style={{ padding: "14px 32px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontWeight: 600, textDecoration: "none", fontSize: 15 }}>Get in Touch</a>
           </div>
         </div>
         <div style={{ marginTop: 80, display: "flex", flexWrap: "wrap", gap: 10, transition: "opacity 1s 0.5s", opacity: mounted ? 1 : 0 }}>
-          {tags.map(tag => (
-            <span key={tag} style={{ padding: "8px 16px", borderRadius: 20, border: "1px solid rgba(255,255,255,0.08)", color: "#8899aa", fontSize: 13, background: "rgba(255,255,255,0.02)" }}>{tag}</span>
+          {["GA4", "Google Ads", "Meta Ads", "BigQuery", "Looker Studio", "JavaScript", "REST API", "GTM", "Attribution Modeling"].map(t => (
+            <span key={t} style={{ padding: "8px 16px", borderRadius: 20, border: "1px solid rgba(255,255,255,0.08)", color: "#8899aa", fontSize: 13, background: "rgba(255,255,255,0.02)" }}>{t}</span>
           ))}
         </div>
       </div>
@@ -343,12 +334,11 @@ function MetricsSection() {
 }
 
 function SkillsSection() {
-  const { t } = useTranslation();
   const [ref, inView] = useInView();
   return (
     <section id="skills" style={{ padding: "80px 5vw" }} ref={ref}>
       <div style={{ maxWidth: 900, margin: "0 auto" }}>
-        <SectionHeader label={t("skills.label")} title={t("skills.title")} inView={inView} />
+        <SectionHeader label="Expertise" title="Skills & Tools" inView={inView} />
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 24, marginTop: 48 }}>
           {SKILLS.map((s, si) => (
             <div key={s.category} style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 16, padding: 24 }}>
@@ -366,16 +356,17 @@ function SkillsSection() {
 }
 
 function ProjectCard({ project: p, onPreview }) {
-  const { t } = useTranslation();
   const [hovered, setHovered] = useState(false);
   const [ref, inView] = useInView(0.1);
   return (
     <div ref={ref} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} style={{
       background: hovered ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.02)",
       border: `1px solid ${hovered ? p.color + "44" : "rgba(255,255,255,0.07)"}`,
-      borderRadius: 16, padding: 28, transition: "all 0.3s",
+      borderRadius: 16, padding: 28,
+      transition: "all 0.3s",
       transform: inView ? (hovered ? "translateY(-4px)" : "none") : "translateY(20px)",
-      opacity: inView ? 1 : 0, position: "relative", overflow: "hidden",
+      opacity: inView ? 1 : 0,
+      position: "relative", overflow: "hidden",
     }}>
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: hovered ? `linear-gradient(90deg, transparent, ${p.color}, transparent)` : "transparent", transition: "all 0.3s" }} />
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
@@ -388,8 +379,8 @@ function ProjectCard({ project: p, onPreview }) {
       <h3 style={{ color: "#fff", fontSize: 18, fontWeight: 700, margin: "0 0 10px" }}>{p.title}</h3>
       <p style={{ color: "#8899aa", fontSize: 14, lineHeight: 1.6, margin: "0 0 20px" }}>{p.description}</p>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 20 }}>
-        {p.tags.map(tag => (
-          <span key={tag} style={{ fontSize: 12, padding: "4px 10px", borderRadius: 12, background: `${p.color}11`, color: p.color, border: `1px solid ${p.color}22` }}>{tag}</span>
+        {p.tags.map(t => (
+          <span key={t} style={{ fontSize: 12, padding: "4px 10px", borderRadius: 12, background: `${p.color}11`, color: p.color, border: `1px solid ${p.color}22` }}>{t}</span>
         ))}
       </div>
       <div style={{ display: "flex", gap: 10 }}>
@@ -398,7 +389,7 @@ function ProjectCard({ project: p, onPreview }) {
           border: "none", color: "#080a10", fontWeight: 700, fontSize: 13,
           cursor: "pointer", transition: "all 0.2s",
           transform: hovered ? "scale(1.02)" : "scale(1)",
-        }}>{t("projects.livePreview")}</button>
+        }}>▶ Live Preview</button>
         <a href={p.githubUrl} target="_blank" rel="noopener noreferrer" style={{
           padding: "11px 16px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.1)",
           color: "#8899aa", textDecoration: "none", fontSize: 13, transition: "all 0.2s",
@@ -406,21 +397,22 @@ function ProjectCard({ project: p, onPreview }) {
         }}
           onMouseEnter={e => { e.currentTarget.style.borderColor = p.color; e.currentTarget.style.color = p.color; }}
           onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.color = "#8899aa"; }}
-        >{t("projects.github")}</a>
+        >GitHub</a>
       </div>
     </div>
   );
 }
 
 function ProjectsSection() {
-  const { t } = useTranslation();
   const [ref, inView] = useInView();
   const [activeModal, setActiveModal] = useState(null);
   return (
     <section id="projects" style={{ padding: "80px 5vw" }} ref={ref}>
       <div style={{ maxWidth: 900, margin: "0 auto" }}>
-        <SectionHeader label={t("projects.label")} title={t("projects.title")} inView={inView} />
-        <p style={{ color: "#8899aa", fontSize: 15, marginTop: 12, marginBottom: 48 }}>{t("projects.subtitle")}</p>
+        <SectionHeader label="Work" title="Live Projects" inView={inView} />
+        <p style={{ color: "#8899aa", fontSize: 15, marginTop: 12, marginBottom: 48 }}>
+          Click <span style={{ color: "#00f5c4", fontFamily: "monospace" }}>Live Preview</span> to explore each project directly here.
+        </p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(380px, 1fr))", gap: 24 }}>
           {LIVE_PROJECTS.map(p => <ProjectCard key={p.id} project={p} onPreview={() => setActiveModal(p)} />)}
         </div>
@@ -431,21 +423,20 @@ function ProjectsSection() {
 }
 
 function CaseStudySection() {
-  const { t } = useTranslation();
   const [ref, inView] = useInView();
   return (
     <section id="case-studies" style={{ padding: "80px 5vw" }} ref={ref}>
       <div style={{ maxWidth: 900, margin: "0 auto" }}>
-        <SectionHeader label={t("caseStudy.label")} title={t("caseStudy.title")} inView={inView} />
+        <SectionHeader label="Deep Dive" title="Case Study" inView={inView} />
         <div style={{ marginTop: 48, background: "rgba(0,245,196,0.03)", border: "1px solid rgba(0,245,196,0.12)", borderRadius: 20, overflow: "hidden" }}>
           <div style={{ padding: "32px 40px", borderBottom: "1px solid rgba(0,245,196,0.08)" }}>
             <h3 style={{ color: "#fff", fontSize: 22, fontWeight: 800, margin: 0 }}>{CASE_STUDY.title}</h3>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
             <div style={{ padding: "32px 40px", borderRight: "1px solid rgba(0,245,196,0.08)" }}>
-              <h4 style={{ color: "#ff6b6b", fontSize: 12, letterSpacing: 3, textTransform: "uppercase", margin: "0 0 12px" }}>{t("caseStudy.challenge")}</h4>
+              <h4 style={{ color: "#ff6b6b", fontSize: 12, letterSpacing: 3, textTransform: "uppercase", margin: "0 0 12px" }}>Challenge</h4>
               <p style={{ color: "#8899aa", fontSize: 14, lineHeight: 1.7, margin: 0 }}>{CASE_STUDY.challenge}</p>
-              <h4 style={{ color: "#00f5c4", fontSize: 12, letterSpacing: 3, textTransform: "uppercase", margin: "28px 0 12px" }}>{t("caseStudy.solution")}</h4>
+              <h4 style={{ color: "#00f5c4", fontSize: 12, letterSpacing: 3, textTransform: "uppercase", margin: "28px 0 12px" }}>Solution</h4>
               <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
                 {CASE_STUDY.solution.map((s, i) => (
                   <li key={i} style={{ color: "#8899aa", fontSize: 14, lineHeight: 1.7, paddingLeft: 20, position: "relative", marginBottom: 6 }}>
@@ -455,7 +446,7 @@ function CaseStudySection() {
               </ul>
             </div>
             <div style={{ padding: "32px 40px" }}>
-              <h4 style={{ color: "#7b61ff", fontSize: 12, letterSpacing: 3, textTransform: "uppercase", margin: "0 0 20px" }}>{t("caseStudy.results")}</h4>
+              <h4 style={{ color: "#7b61ff", fontSize: 12, letterSpacing: 3, textTransform: "uppercase", margin: "0 0 20px" }}>Results</h4>
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 {CASE_STUDY.results.map(r => (
                   <div key={r.metric} style={{ background: "rgba(255,255,255,0.02)", borderRadius: 10, padding: "14px 18px" }}>
@@ -477,18 +468,19 @@ function CaseStudySection() {
 }
 
 function ContactSection() {
-  const { t } = useTranslation();
   const [ref, inView] = useInView();
   return (
     <section id="contact" style={{ padding: "80px 5vw 120px" }} ref={ref}>
       <div style={{ maxWidth: 600, margin: "0 auto", textAlign: "center" }}>
-        <SectionHeader label={t("contact.label")} title={t("contact.title")} inView={inView} centered />
-        <p style={{ color: "#8899aa", fontSize: 16, lineHeight: 1.7, margin: "0 0 40px" }}>{t("contact.description")}</p>
+        <SectionHeader label="Let's Talk" title="Get in Touch" inView={inView} centered />
+        <p style={{ color: "#8899aa", fontSize: 16, lineHeight: 1.7, margin: "0 0 40px" }}>
+          Looking for a performance marketing analyst or GA4 specialist? Let's discuss how data can grow your business.
+        </p>
         <div style={{ display: "flex", flexDirection: "column", gap: 16, alignItems: "center" }}>
           {[
-            { label: t("contact.email"), value: "kxsnirbusiness@gmail.com", icon: "✉" },
+            { label: "Email", value: "kxsnirbusiness@gmail.com", icon: "✉" },
             { label: "LinkedIn", value: "linkedin.com/in/filipkusnir", icon: "in" },
-            { label: t("contact.location"), value: t("contact.locationValue"), icon: "◎" },
+            { label: "Location", value: "Bratislava, Slovakia / Remote", icon: "◎" },
           ].map(c => (
             <div key={c.label} style={{ display: "flex", alignItems: "center", gap: 16, padding: "16px 28px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)", width: "100%", maxWidth: 360 }}>
               <span style={{ fontSize: 18, width: 28, textAlign: "center", color: "#00f5c4" }}>{c.icon}</span>
@@ -505,11 +497,9 @@ function ContactSection() {
 }
 
 export default function App() {
-  const { t } = useTranslation();
-  const [activeNav, setActiveNav] = useState("about");
+  const [activeNav, setActiveNav] = useState("About");
   return (
-    <div style={{ background: "#080a10", minHeight: "100vh", width: "100%", overflowX: "hidden", fontFamily: "'Inter', 'Helvetica Neue', sans-serif", color: "#fff" }}>
-      <style>{`
+<div style={{ background: "#080a10", minHeight: "100vh", width: "100%", maxWidth: "100%", overflowX: "hidden", fontFamily: "'Inter', 'Helvetica Neue', sans-serif", color: "#fff" }}>      <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&display=swap');
         * { box-sizing: border-box; }
         html { scroll-behavior: smooth; }
@@ -529,8 +519,8 @@ export default function App() {
       <CaseStudySection />
       <ContactSection />
       <footer style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "24px 5vw", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span style={{ color: "#8899aa", fontSize: 13 }}>© 2026 {t("footer.text")}</span>
-        <span style={{ color: "#8899aa", fontSize: 13, fontFamily: "monospace" }}>{t("footer.built")}</span>
+        <span style={{ color: "#8899aa", fontSize: 13 }}>© 2026 Filip Kušnír — Digital Marketing & Data Analyst</span>
+        <span style={{ color: "#8899aa", fontSize: 13, fontFamily: "monospace" }}>Built with React</span>
       </footer>
     </div>
   );
