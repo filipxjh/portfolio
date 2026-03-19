@@ -10,9 +10,10 @@ const classCodes = {
     druid: 256,
     sorcerer: 512,
   };
-var klass = "";
-window.onload = function() {
-    FighterStart();  
+var klass = "";{
+// window.onload removed - handled by index.html
+// function() {
+    // FighterStart();
     
   };
 const classPortraits = {
