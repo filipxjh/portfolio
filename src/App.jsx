@@ -27,7 +27,7 @@ const LIVE_PROJECTS = [
     resultDetail: "interactive demo",
     description: "Interactive marketing analytics dashboard visualizing campaign performance across channels. Displays KPIs, traffic sources, channel breakdown and top campaigns with animated charts.",
     color: "#00f5c4",
-    liveUrl: "YOUR_DASHBOARD_URL_HERE",
+    liveUrl: "/dashboard",
     githubUrl: "https://github.com/yourusername/ga4-dashboard",
   },
   {
@@ -39,7 +39,7 @@ const LIVE_PROJECTS = [
     resultDetail: "real-time data",
     description: "Full-stack web application fetching and processing structured data from an external REST API. Users can dynamically filter, combine and save data configurations with real-time updates.",
     color: "#7b61ff",
-    liveUrl: "YOUR_DND_PROJECT_URL_HERE",
+    liveUrl: "/dnd-builds",
     githubUrl: "https://github.com/yourusername/api-web-app",
   },
 ];
