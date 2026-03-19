@@ -1,552 +1,724 @@
 <!DOCTYPE html>
-<html lang="sk">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <base href="/dnd-builds/">
-  <title>Dark and Darker Build Editor</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+  <title>DaDBuilds — Build Editor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { box-sizing: border-box; }
-
+    :root {
+      --bg:      #0c0b0a;
+      --bg2:     #111010;
+      --panel:   #141210;
+      --panel2:  #1c1917;
+      --border:  #3a3530;
+      --border2: #4a4540;
+      --text:    #b8b0a0;
+      --text2:   #8a8278;
+      --text3:   #5a5248;
+      --hi:      #d4c89a;
+      --orange:  #c87830;
+      --orange2: #e8a050;
+      --red:     #8b2010;
+      --red2:    #c03020;
+      --slot:    #0e0d0c;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Cinzel', serif;
-      background-color: #0d0d0d;
-      color: #888;
-      margin: 0;
-      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 9998; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
     }
 
-    /* NAV */
-    nav {
-      background-color: #121212;
-      padding: 15px;
-      text-align: center;
-      border-bottom: 2px solid #555;
-      position: sticky;
-      top: 0;
-      z-index: 50;
+    /* ── NAV ── */
+    nav { background: linear-gradient(180deg, #0f0e0c 0%, var(--bg2) 100%); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+    .nav-inner {
+      max-width: 1160px; margin: 0 auto;
+      display: flex; align-items: stretch; height: 44px;
     }
-    nav ul {
-      list-style: none;
-      padding: 0; margin: 0;
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 8px;
+    .nav-brand {
+      padding: 0 20px;
+      display: flex; align-items: center;
+      font-size: 0.95rem; font-weight: 700;
+      color: var(--hi); letter-spacing: 3px;
+      border-right: 1px solid var(--border);
+      background: rgba(0,0,0,0.2);
+      white-space: nowrap;
     }
+    nav ul { list-style: none; display: flex; }
     nav ul li a {
-      color: #bbb;
-      text-decoration: none;
-      font-size: clamp(0.85rem, 2vw, 1.2rem);
-      padding: 4px 8px;
+      display: flex; align-items: center;
+      padding: 0 18px; height: 44px;
+      color: var(--text2); text-decoration: none;
+      font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase;
+      border-right: 1px solid var(--border);
+      transition: all 0.15s; position: relative;
     }
-    nav ul li a:hover { color: #ff9900; }
+    nav ul li a:hover { color: var(--hi); background: rgba(255,255,255,0.02); }
+    nav ul li a.active { color: var(--orange2); }
+    nav ul li a.active::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+      background: var(--orange);
+    }
 
-    /* CLASS SECTION */
+    /* ── CLASS SECTION ── */
     #class-section {
-      position: relative;
-      padding: 40px 20px 80px;
-      text-align: center;
+      position: relative; overflow: hidden;
+      border-bottom: 1px solid var(--border);
     }
-    #class-section::before {
-      content: "";
+    .class-bg {
       position: absolute; inset: 0;
-      background: url('images/bg1.webp') no-repeat center center / cover;
-      opacity: 0.25;
-      z-index: -1;
+      background: url('images/bg1.webp') no-repeat center 30% / cover;
+      opacity: 0.1;
     }
-    #class-section::after {
-      content: "";
-      position: absolute;
-      bottom: -2.5px; left: 20%; right: 20%;
-      height: 5px;
-      background: linear-gradient(to right, rgb(68,48,5), rgba(255,153,0,0.5), rgb(68,48,5));
-      border-radius: 5px;
+    .class-vignette {
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(180deg, rgba(12,11,10,0.5) 0%, transparent 30%, transparent 70%, rgba(12,11,10,1) 100%),
+        linear-gradient(90deg, rgba(12,11,10,0.7) 0%, transparent 25%, transparent 75%, rgba(12,11,10,0.7) 100%);
     }
-
+    .class-content {
+      position: relative; z-index: 2;
+      padding: 28px 20px 36px;
+      display: flex; flex-direction: column; align-items: center; gap: 18px;
+    }
+    .row-divider {
+      display: flex; align-items: center; gap: 10px; width: 100%; max-width: 720px;
+    }
+    .row-divider-line { flex: 1; height: 1px; background: var(--border); }
+    .row-divider-label {
+      font-size: 0.85rem; letter-spacing: 5px; color: var(--text2); text-transform: uppercase;
+      white-space: nowrap; font-weight: 600;
+      text-shadow: 0 0 20px rgba(184,176,160,0.15);
+    }
+    .row-divider-diamond {
+      width: 5px; height: 5px; background: var(--orange);
+      clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+      flex-shrink: 0;
+    }
     #class-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: center;
-      margin-bottom: 20px;
+      display: flex; flex-wrap: wrap; gap: 3px; justify-content: center;
     }
-    #class-buttons button {
-      background-color: #1a1a1a;
-      color: #ccc;
-      border: 1px solid #555;
-      padding: 8px 14px;
-      cursor: pointer;
-      font-family: 'Cinzel', serif;
-      font-size: clamp(0.75rem, 1.5vw, 1rem);
-      transition: background 0.2s;
+    .class-btn {
+      background: linear-gradient(180deg, #1c1a16 0%, #141210 100%);
+      color: var(--text2); border: 1px solid var(--border);
+      padding: 10px 22px; cursor: pointer;
+      font-family: 'Cinzel', serif; font-size: 0.82rem;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      transition: all 0.15s;
+      clip-path: polygon(5px 0%, 100% 0%, calc(100% - 5px) 100%, 0% 100%);
     }
-    #class-buttons button:hover { background-color: #252525; color: #ff9900; }
-
+    .class-btn:hover { color: var(--hi); border-color: var(--border2); background: linear-gradient(180deg, #242018 0%, #1c1916 100%); }
+    .class-btn.active { color: var(--orange2); border-color: var(--orange); background: linear-gradient(180deg, #261e14 0%, #1c1610 100%); }
     #class-portrait {
-      width: min(300px, 80vw);
-      height: auto;
+      width: min(280px, 65vw);
+      height: min(280px, 65vw);
       display: block;
-      margin: 0 auto;
-      object-fit: contain;
+      object-fit: cover;
+      object-position: top center;
+      filter: drop-shadow(0 4px 24px rgba(0,0,0,0.95)) sepia(0.05);
+      transition: filter 0.3s;
     }
 
-    /* MAIN LAYOUT */
-    main {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 24px;
-      padding: 40px 20px;
-      position: relative;
+    /* ── PAGE WRAPPER ── */
+    .page-bg {
+      position: fixed; inset: 0; z-index: -1;
       background: url('images/bg3.webp') no-repeat center center / cover;
+      filter: brightness(0.3) saturate(0.4);
     }
-    main::after {
-      content: "";
-      position: absolute;
-      bottom: -2.5px; left: 20%; right: 20%;
-      height: 5px;
-      background: linear-gradient(to right, rgb(68,48,5), rgba(255,153,0,0.5), rgb(68,48,5));
-      border-radius: 5px;
-    }
-
-    /* STATS */
-    #character-section {
-      flex: 1 1 280px;
-      max-width: 420px;
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-    }
-    #stat-container {
-      background: rgba(20,20,20,0.92);
-      padding: 16px;
-      border: 2px solid #555;
-      width: 100%;
-    }
-    #stat-container h2 { margin-top: 0; color: #ff9900; font-size: 1.1rem; }
-    #stat-table { width: 100%; border-collapse: collapse; font-size: clamp(0.75rem, 1.5vw, 0.95rem); }
-    #stat-table td { padding: 4px 8px; border-bottom: 1px solid #333; }
-    #stat-table td:first-child { color: #aaa; }
-    #stat-table td:last-child { color: #fff; text-align: right; }
-
-    /* GEAR GRID */
-    #gear-selection {
-      flex: 1 1 300px;
-      max-width: 580px;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 20px 0;
-    }
-    #svg-wrapper {
+    .page-center {
+      max-width: 1160px;
+      margin: 0 auto;
       position: relative;
-      width: 100%;
-      max-width: 560px;
+      box-shadow: 0 0 80px rgba(0,0,0,0.8);
     }
-    #svg-wrapper svg {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-    .gear-slot2 { cursor: pointer; transition: opacity 0.2s; }
-    .gear-slot2:hover { opacity: 0.75; }
 
-    /* POPUP */
+    /* ── MAIN ── */
+    main {
+      display: flex; flex-wrap: wrap;
+      gap: 1px; padding: 1px;
+      background: var(--border);
+      position: relative;
+    }
+    main::before { display: none; }
+
+    /* ── STATS ── */
+    #character-section {
+      flex: 0 0 252px; display: flex; flex-direction: column; gap: 1px;
+    }
+    .panel-bar {
+      background: linear-gradient(180deg, #1e1c18 0%, #161412 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 7px 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .panel-bar-dot { width: 2px; height: 14px; background: var(--orange); }
+    .panel-bar-title { font-size: 0.62rem; letter-spacing: 2.5px; color: var(--hi); text-transform: uppercase; }
+    #stat-container { background: var(--panel); flex: 1; }
+    #stat-table { width: 100%; border-collapse: collapse; }
+    #stat-table tr:nth-child(even) { background: rgba(0,0,0,0.12); }
+    #stat-table tr:hover { background: rgba(255,255,255,0.015); }
+    #stat-table td { padding: 4px 10px; border-bottom: 1px solid rgba(58,53,48,0.35); font-size: 0.7rem; }
+    #stat-table td:first-child { color: var(--text2); }
+    #stat-table td:last-child { color: var(--hi); text-align: right; font-size: 0.8rem; }
+    .stat-cat td {
+      background: linear-gradient(180deg, #1a1815 0%, var(--panel) 100%) !important;
+      color: var(--text3) !important; font-size: 0.58rem !important;
+      letter-spacing: 2px; padding: 3px 10px !important;
+      border-top: 1px solid var(--border) !important;
+      border-bottom: 1px solid var(--border) !important;
+    }
+
+    /* ── BUILD CONTROLS ── */
+    #build-controls {
+      background: var(--panel);
+      padding: 10px; display: flex; flex-direction: column; gap: 6px;
+    }
+    .bc-label {
+      font-size: 0.58rem; color: var(--text3); letter-spacing: 2.5px;
+      text-transform: uppercase; padding-bottom: 5px;
+      border-bottom: 1px solid var(--border);
+    }
+    #build-name-input {
+      width: 100%; background: var(--slot); border: 1px solid var(--border);
+      color: var(--text); padding: 6px 8px;
+      font-family: 'Cinzel', serif; font-size: 0.7rem; outline: none;
+      transition: border-color 0.15s;
+      clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
+    }
+    #build-name-input:focus { border-color: var(--orange); }
+    #build-name-input::placeholder { color: var(--text3); }
+    .btn-row { display: flex; gap: 4px; }
+    .bbtn {
+      flex: 1; padding: 6px 0; cursor: pointer;
+      font-family: 'Cinzel', serif; font-size: 0.62rem;
+      letter-spacing: 1px; text-transform: uppercase;
+      transition: all 0.15s;
+      background: linear-gradient(180deg, var(--panel2) 0%, var(--panel) 100%);
+      clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
+    }
+    .bbtn.save { border: 1px solid rgba(200,120,48,0.5); color: var(--orange2); }
+    .bbtn.save:hover { background: rgba(200,120,48,0.08); }
+    .bbtn.clr { border: 1px solid rgba(139,32,16,0.4); color: #a04030; }
+    .bbtn.clr:hover { background: rgba(139,32,16,0.08); }
+    #saved-builds-list { max-height: 100px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+    .sbi {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 5px 4px; cursor: pointer; font-size: 0.68rem;
+      border-left: 2px solid transparent; transition: all 0.12s;
+    }
+    .sbi:hover { border-left-color: var(--orange); background: rgba(200,120,48,0.04); }
+    .sbi-name { color: var(--text); }
+    .sbi-meta { color: var(--text3); font-size: 0.6rem; }
+    .sbi-del { color: var(--red2); opacity: 0; font-size: 0.68rem; padding: 1px 5px; transition: opacity 0.12s; }
+    .sbi:hover .sbi-del { opacity: 1; }
+    .builds-empty { color: var(--text3); font-size: 0.65rem; text-align: center; padding: 8px; font-style: italic; }
+
+    /* ── GEAR FRAME ── */
+    #gear-wrap { flex: 1 1 500px; display: flex; flex-direction: column; min-width: 0; }
+    #gear-selection {
+      flex: 1; position: relative;
+      display: flex; justify-content: center; align-items: center; padding: 24px;
+      overflow: hidden;
+      background: var(--bg);
+      min-height: 500px;
+    }
+    #gear-selection::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url('images/bg3.webp') no-repeat center center / cover;
+      opacity: 0.12;
+      z-index: 0;
+    }
+    #gear-selection::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at center, transparent 20%, rgba(12,11,10,0.6) 100%);
+      z-index: 1; pointer-events: none;
+    }
+    /* Decorative corner frames */
+    .gear-frame {
+      position: absolute; inset: 12px; z-index: 4; pointer-events: none;
+    }
+    .corner {
+      position: absolute; width: 18px; height: 18px;
+      border-color: var(--orange); border-style: solid; opacity: 0.7;
+    }
+    .corner-tl { top: 0; left: 0; border-width: 2px 0 0 2px; }
+    .corner-tr { top: 0; right: 0; border-width: 2px 2px 0 0; }
+    .corner-bl { bottom: 0; left: 0; border-width: 0 0 2px 2px; }
+    .corner-br { bottom: 0; right: 0; border-width: 0 2px 2px 0; }
+    #svg-wrapper { position: relative; width: 100%; max-width: 480px; z-index: 3; margin: auto; }
+    #svg-wrapper svg { width: 100%; height: auto; display: block; }
+    .gear-slot2 { cursor: pointer; transition: filter 0.15s; }
+    .gear-slot2:hover { filter: brightness(1.25) drop-shadow(0 0 5px rgba(200,120,48,0.45)); }
+
+    /* ── POPUP ── */
     .popup-overlay {
-      display: none;
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.75);
-      z-index: 999;
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.87); z-index: 999;
     }
     .popup {
-      display: none;
-      position: fixed;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(20,20,20,0.97);
-      color: #ccc;
-      padding: 20px;
-      border-radius: 8px;
-      border: 2px solid #555;
-      width: min(420px, 92vw);
-      max-height: 80vh;
-      overflow-y: auto;
+      display: none; position: fixed;
+      top: 50%; left: 50%; transform: translate(-50%, -50%);
       z-index: 1000;
+      width: min(420px, 96vw); max-height: 82vh;
+      flex-direction: column;
+      background: var(--panel);
+      border: 1px solid var(--border2);
+      box-shadow: 0 0 0 1px var(--border), 0 24px 60px rgba(0,0,0,0.95);
     }
-    .popup h2, .popup p { color: #ff9900; margin-top: 0; }
-    .popup ul { padding: 0; margin: 10px 0; list-style: none; }
-    .popup ul li { padding: 6px 10px; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid #333; font-size: 0.9rem; }
-    .popup ul li:hover { background: rgba(255,153,0,0.1); }
-    .popup button {
-      background: #1a1a1a; color: #ccc;
-      border: 1px solid #555; padding: 6px 14px;
-      cursor: pointer; margin-top: 10px;
-      font-family: 'Cinzel', serif;
-      transition: all 0.2s;
+    .popup.open { display: flex; animation: popIn 0.18s ease; }
+    @keyframes popIn {
+      from { opacity: 0; transform: translate(-50%, calc(-50% + 10px)); }
+      to   { opacity: 1; transform: translate(-50%, -50%); }
     }
-    .popup button:hover { background: #252525; color: #ff9900; }
+    .popup-tbar {
+      background: linear-gradient(180deg, #1e1c18 0%, #161412 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 9px 12px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .popup-tbar-l { display: flex; align-items: center; gap: 8px; }
+    .popup-tbar .dot { width: 2px; height: 14px; background: var(--orange); flex-shrink: 0; }
+    .popup-slot { font-size: 0.75rem; letter-spacing: 2px; color: var(--hi); text-transform: uppercase; }
+    .popup-meta { font-size: 0.6rem; color: var(--text3); letter-spacing: 1px; margin-top: 1px; }
+    .popup-xbtn {
+      background: none; border: 1px solid var(--border); color: var(--text2);
+      cursor: pointer; width: 20px; height: 20px; font-size: 0.65rem;
+      display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+    }
+    .popup-xbtn:hover { border-color: var(--red2); color: var(--red2); }
 
-    .pagination {
-      display: flex; align-items: center; gap: 10px;
-      margin-top: 10px; flex-wrap: wrap;
+    .popup-srow {
+      padding: 7px 10px; border-bottom: 1px solid var(--border);
+      flex-shrink: 0; display: flex; align-items: center; gap: 6px;
     }
-    #page-info { color: #aaa; font-size: 0.85rem; }
-
-    #popup-items-container {
-      max-height: 350px;
-      overflow-y: auto;
-      border: 1px solid #555;
-      padding: 5px;
-      border-radius: 5px;
-      background: rgba(10,10,10,0.8);
-      scrollbar-width: none;
+    .slabel { color: var(--text3); font-size: 0.62rem; letter-spacing: 1px; white-space: nowrap; }
+    #popup-search {
+      flex: 1; background: var(--slot); border: 1px solid var(--border);
+      color: var(--text); padding: 5px 8px;
+      font-family: 'Cinzel', serif; font-size: 0.7rem; outline: none;
+      transition: border-color 0.15s;
     }
-    #popup-items-container::-webkit-scrollbar { display: none; }
+    #popup-search:focus { border-color: var(--orange); }
+    #popup-search::placeholder { color: var(--text3); }
 
-    /* ITEM STATS PANEL */
+    #popup-items-container { flex: 1; overflow-y: auto; min-height: 0; scrollbar-width: thin; scrollbar-color: var(--border) var(--slot); }
+    #popup-items { list-style: none; }
+    #popup-items li {
+      padding: 7px 12px; cursor: pointer;
+      display: flex; align-items: center; gap: 8px;
+      border-bottom: 1px solid rgba(58,53,48,0.25);
+      font-size: 0.76rem; letter-spacing: 0.3px; transition: all 0.1s;
+    }
+    #popup-items li:hover { background: rgba(200,120,48,0.05); padding-left: 16px; }
+    .idot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+    .itype { color: var(--text3); font-size: 0.6rem; margin-left: auto; }
+
+    .popup-foot {
+      padding: 7px 10px; border-top: 1px solid var(--border);
+      background: linear-gradient(180deg, var(--panel) 0%, #0f0e0c 100%);
+      display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+    }
+    .pbtn {
+      background: linear-gradient(180deg, #1e1c18 0%, #161412 100%);
+      border: 1px solid var(--border); color: var(--text2); cursor: pointer;
+      padding: 4px 10px; font-family: 'Cinzel', serif; font-size: 0.62rem;
+      letter-spacing: 1px; text-transform: uppercase; transition: all 0.15s;
+      clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
+    }
+    .pbtn:hover { color: var(--hi); border-color: var(--border2); }
+    #page-info { flex: 1; text-align: center; color: var(--text3); font-size: 0.65rem; }
+    .pclosebtn {
+      background: none; border: 1px solid rgba(139,32,16,0.4); color: #a04030;
+      cursor: pointer; padding: 4px 10px; font-family: 'Cinzel', serif;
+      font-size: 0.62rem; letter-spacing: 1px; text-transform: uppercase; transition: all 0.15s;
+    }
+    .pclosebtn:hover { background: rgba(139,32,16,0.1); color: var(--red2); }
+
+    #popup-loading { padding: 18px; text-align: center; color: var(--text3); font-size: 0.72rem; letter-spacing: 1px; }
+    #popup-empty { padding: 14px; text-align: center; color: var(--text3); font-size: 0.7rem; display: none; }
+
+    .rarity-poor     { color: #6a6460; }
+    .rarity-common   { color: #c8c0b0; }
+    .rarity-uncommon { color: #508050; }
+    .rarity-rare     { color: #4878a8; }
+    .rarity-epic     { color: #8858a8; }
+    .rarity-legendary{ color: var(--orange2); }
+
+    /* Item stats */
     #item-stats {
-      display: none;
-      position: fixed;
-      top: 50%;
-      right: 16px;
+      display: none; position: fixed; top: 50%; right: 10px;
       transform: translateY(-50%);
-      background: rgba(20,20,20,0.97);
-      color: #ccc;
-      padding: 12px;
-      border-radius: 8px;
-      border: 2px solid #555;
-      font-size: 13px;
-      width: min(240px, 90vw);
-      max-height: 70vh;
-      overflow-y: auto;
-      z-index: 1001;
+      background: var(--panel); border: 1px solid var(--border2);
+      padding: 10px; font-size: 12px;
+      width: min(190px, 44vw); max-height: 62vh; overflow-y: auto;
+      z-index: 1001; box-shadow: 0 0 20px rgba(0,0,0,0.8);
     }
-    #item-stats h3 { color: #ff9900; margin-top: 0; font-size: 1rem; }
+    .ist-title { font-size: 0.58rem; letter-spacing: 2px; color: var(--orange); text-transform: uppercase; margin-bottom: 7px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
     #item-stats-table { width: 100%; border-collapse: collapse; }
-    #item-stats-table td { border-bottom: 1px solid #333; padding: 4px; font-size: 12px; }
+    #item-stats-table td { padding: 2px 2px; font-size: 0.65rem; border-bottom: 1px solid rgba(58,53,48,0.3); }
+    #item-stats-table td:first-child { color: var(--text2); text-transform: capitalize; }
+    #item-stats-table td:last-child { color: var(--orange2); text-align: right; }
 
-    /* RARITY COLORS */
-    .rarity-poor { color: gray; }
-    .rarity-common { color: white; }
-    .rarity-uncommon { color: #2ecc71; }
-    .rarity-rare { color: #5dade2; }
-    .rarity-epic { color: #af7ac5; }
-    .rarity-legendary { color: orange; }
+    /* Footer */
+    footer { background: var(--bg2); border-top: 1px solid var(--border); padding: 18px 20px; text-align: center; }
+    .footer-inner { max-width: 1160px; margin: 0 auto; }
+    footer p { font-size: 0.62rem; color: var(--text3); margin: 3px auto; max-width: 560px; line-height: 1.7; }
+    .slinks { margin-top: 10px; display: flex; gap: 14px; justify-content: center; }
+    .slinks a { color: var(--text3); text-decoration: none; font-size: 0.65rem; letter-spacing: 1px; text-transform: uppercase; transition: color 0.15s; }
+    .slinks a:hover { color: var(--orange2); }
 
-    /* FOOTER */
-    footer {
-      background-color: #121212;
-      color: #888;
-      padding: 40px 20px;
-      text-align: center;
+    /* Toast */
+    #toast {
+      position: fixed; bottom: 18px; left: 50%;
+      transform: translateX(-50%) translateY(48px);
+      background: var(--panel2); border: 1px solid var(--orange);
+      color: var(--orange2); padding: 7px 16px;
+      font-size: 0.68rem; letter-spacing: 1px; z-index: 9000; pointer-events: none;
+      transition: transform 0.22s ease;
+      clip-path: polygon(7px 0%, 100% 0%, calc(100% - 7px) 100%, 0% 100%);
     }
-    .footer-content p {
-      font-size: clamp(0.7rem, 1.5vw, 0.8rem);
-      margin: 8px 0;
-      max-width: 700px;
-      margin-left: auto;
-      margin-right: auto;
-      line-height: 1.6;
-    }
-    .footer-links, .social-media { margin-top: 12px; }
-    .footer-links a, .social-media a {
-      color: #bbb; text-decoration: none;
-      margin: 0 10px; font-size: 0.95rem;
-    }
-    .footer-links a:hover, .social-media a:hover { color: #ff9900; }
+    #toast.show { transform: translateX(-50%) translateY(0); }
 
-    /* MOBILE */
-    @media (max-width: 640px) {
-      main { padding: 24px 12px; gap: 16px; }
-      #character-section, #gear-selection { max-width: 100%; }
-      #item-stats { right: 8px; width: calc(100vw - 16px); top: auto; bottom: 8px; transform: none; max-height: 45vh; }
-      .popup { width: 96vw; }
+    /* ── PERKS PANEL ── */
+    @media (max-width: 680px) {
+      #character-section { flex: 0 0 100%; }
+      #item-stats { right: 4px; width: calc(100vw - 8px); top: auto; bottom: 4px; transform: none; max-height: 38vh; }
+      nav ul { display: none; }
     }
   </style>
 </head>
 <body>
 
-  <nav>
+<div class="page-bg"></div>
+
+<nav>
+  <div class="nav-inner">
+    <div class="nav-brand">DaDBuilds</div>
     <ul>
-      <li><a href="#">Build Editor</a></li>
+      <li><a href="#" class="active">Build Editor</a></li>
       <li><a href="#">Build List</a></li>
       <li><a href="#">[Coming Soon]</a></li>
     </ul>
-  </nav>
+  </div>
+</nav>
 
-  <section id="class-section">
-    <div id="class-buttons">
-      <button onclick="FighterStart()">Fighter</button>
-      <button onclick="RangerStart()">Ranger</button>
-      <button onclick="ClericStart()">Cleric</button>
-      <button onclick="DruidStart()">Druid</button>
-      <button onclick="BardStart()">Bard</button>
-      <button onclick="WarlockStart()">Warlock</button>
-      <button onclick="SorcererStart()">Sorcerer</button>
-      <button onclick="WizardStart()">Wizard</button>
-      <button onclick="RogueStart()">Rogue</button>
-      <button onclick="BarbarianStart()">Barbarian</button>
+<div class="page-center">
+
+<section id="class-section">
+  <div class="class-bg"></div>
+  <div class="class-vignette"></div>
+  <div class="class-content">
+    <div class="row-divider">
+      <div class="row-divider-line"></div>
+      <div class="row-divider-diamond"></div>
+      <div class="row-divider-label">Select Class</div>
+      <div class="row-divider-diamond"></div>
+      <div class="row-divider-line"></div>
     </div>
-    <img id="class-portrait" src="" alt="Class Portrait">
+    <div id="class-buttons">
+      <button class="class-btn" onclick="FighterStart()" data-class="fighter">Fighter</button>
+      <button class="class-btn" onclick="RangerStart()" data-class="ranger">Ranger</button>
+      <button class="class-btn" onclick="ClericStart()" data-class="cleric">Cleric</button>
+      <button class="class-btn" onclick="DruidStart()" data-class="druid">Druid</button>
+      <button class="class-btn" onclick="BardStart()" data-class="bard">Bard</button>
+      <button class="class-btn" onclick="WarlockStart()" data-class="warlock">Warlock</button>
+      <button class="class-btn" onclick="SorcererStart()" data-class="sorcerer">Sorcerer</button>
+      <button class="class-btn" onclick="WizardStart()" data-class="wizard">Wizard</button>
+      <button class="class-btn" onclick="RogueStart()" data-class="rogue">Rogue</button>
+      <button class="class-btn" onclick="BarbarianStart()" data-class="barbarian">Barbarian</button>
+    </div>
+    <img id="class-portrait" src="" alt="">
+  </div>
+</section>
+
+<main>
+  <!-- Stats + Builds -->
+  <section id="character-section">
+    <div class="panel-bar"><div class="panel-bar-dot"></div><span class="panel-bar-title">Character Stats</span></div>
+    <div id="stat-container">
+      <table id="stat-table">
+        <tr class="stat-cat"><td colspan="2">Base Attributes</td></tr>
+        <tr><td>Strength</td><td id="strength">-</td></tr>
+        <tr><td>Vigor</td><td id="vigor">-</td></tr>
+        <tr><td>Agility</td><td id="agility">-</td></tr>
+        <tr><td>Dexterity</td><td id="dexterity">-</td></tr>
+        <tr><td>Will</td><td id="will">-</td></tr>
+        <tr><td>Knowledge</td><td id="knowledge">-</td></tr>
+        <tr><td>Resourcefulness</td><td id="resourcefulness">-</td></tr>
+        <tr class="stat-cat"><td colspan="2">Defense</td></tr>
+        <tr><td>Armor Rating</td><td id="armor_rating">-</td></tr>
+        <tr><td>Magic Resistance</td><td id="magic_resistance">-</td></tr>
+        <tr><td>Max Health</td><td id="max_health">-</td></tr>
+        <tr><td>Phys. Dmg Reduction</td><td id="physical_damage_reduction">-</td></tr>
+        <tr><td>Magic Dmg Reduction</td><td id="magical_damage_reduction">-</td></tr>
+        <tr class="stat-cat"><td colspan="2">Offense</td></tr>
+        <tr><td>Physical Power</td><td id="physical_power">-</td></tr>
+        <tr><td>Phys. Power Bonus</td><td id="physical_power_bonus">-</td></tr>
+        <tr><td>Magical Power</td><td id="magical_power">-</td></tr>
+        <tr><td>Magic Power Bonus</td><td id="magical_power_bonus">-</td></tr>
+        <tr class="stat-cat"><td colspan="2">Mobility</td></tr>
+        <tr><td>Action Speed</td><td id="action_speed">-</td></tr>
+        <tr><td>Movement Speed</td><td id="movement_speed">-</td></tr>
+        <tr><td>Move Speed Bonus</td><td id="move_speed_bonus">-</td></tr>
+        <tr><td>Interaction Speed</td><td id="regular_interaction_speed">-</td></tr>
+      </table>
+    </div>
+    <div id="build-controls">
+      <div class="bc-label">◆ Saved Builds</div>
+      <input type="text" id="build-name-input" placeholder="Build name..." maxlength="28">
+      <div class="btn-row">
+        <button class="bbtn save" onclick="saveBuild()">Save Build</button>
+        <button class="bbtn clr" onclick="clearBuild()">Clear</button>
+      </div>
+      <div id="saved-builds-list"></div>
+    </div>
   </section>
 
-  <main>
-    <section id="character-section">
-      <div id="stat-container">
-        <h2>Stats</h2>
-        <table id="stat-table">
-          <tr><td>Strength</td><td id="strength">-</td></tr>
-          <tr><td>Vigor</td><td id="vigor">-</td></tr>
-          <tr><td>Agility</td><td id="agility">-</td></tr>
-          <tr><td>Dexterity</td><td id="dexterity">-</td></tr>
-          <tr><td>Will</td><td id="will">-</td></tr>
-          <tr><td>Knowledge</td><td id="knowledge">-</td></tr>
-          <tr><td>Resourcefulness</td><td id="resourcefulness">-</td></tr>
-          <tr><td>Armor Rating</td><td id="armor_rating">-</td></tr>
-          <tr><td>Magic Resistance</td><td id="magic_resistance">-</td></tr>
-          <tr><td>Max Health</td><td id="max_health">-</td></tr>
-          <tr><td>Action Speed</td><td id="action_speed">-</td></tr>
-          <tr><td>Phys. Dmg Reduction</td><td id="physical_damage_reduction">-</td></tr>
-          <tr><td>Magic Dmg Reduction</td><td id="magical_damage_reduction">-</td></tr>
-          <tr><td>Physical Power</td><td id="physical_power">-</td></tr>
-          <tr><td>Phys. Power Bonus</td><td id="physical_power_bonus">-</td></tr>
-          <tr><td>Magical Power</td><td id="magical_power">-</td></tr>
-          <tr><td>Magic Power Bonus</td><td id="magical_power_bonus">-</td></tr>
-          <tr><td>Movement Speed</td><td id="movement_speed">-</td></tr>
-          <tr><td>Move Speed Bonus</td><td id="move_speed_bonus">-</td></tr>
-          <tr><td>Interaction Speed</td><td id="regular_interaction_speed">-</td></tr>
-        </table>
-      </div>
-    </section>
-
+  <!-- Gear -->
+  <div id="gear-wrap">
+    <div class="panel-bar"><div class="panel-bar-dot"></div><span class="panel-bar-title">Equipment</span></div>
     <section id="gear-selection">
+      <div class="gear-frame">
+        <div class="corner corner-tl"></div>
+        <div class="corner corner-tr"></div>
+        <div class="corner corner-bl"></div>
+        <div class="corner corner-br"></div>
+      </div>
       <div id="svg-wrapper">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 542">
-          <image id="Primary"    href="images/Inventory_WeaponSet_BG.webp"         width="148" height="200" x="15"  y="5"   class="gear-slot2"></image>
-          <image id="Secondary"  href="images/Inventory_WeaponSet_BG.webp"         width="148" height="200" x="400" y="5"   class="gear-slot2"></image>
-          <image id="head"       href="images/Slot_Equipment_HelmetGloveBoots_BG.webp" width="90" height="90" x="235" y="50"  class="gear-slot2"></image>
-          <image id="chest"      href="images/Slot_Equipment_ChestAndPants_BG.webp"   width="110" height="147" x="225" y="150" class="gear-slot2"></image>
-          <image id="legs"       href="images/Slot_Equipment_ChestAndPants_BG.webp"   width="110" height="147" x="225" y="307" class="gear-slot2"></image>
-          <image id="sash"       href="images/Slot_Equipment_HelmetGloveBoots_BG.webp" width="90" height="90" x="125" y="207" class="gear-slot2"></image>
-          <image id="back"       href="images/Slot_Equipment_HelmetGloveBoots_BG.webp" width="90" height="90" x="345" y="207" class="gear-slot2"></image>
-          <image id="hands"      href="images/Slot_Equipment_HelmetGloveBoots_BG.webp" width="90" height="90" x="125" y="367" class="gear-slot2"></image>
-          <image id="foot"       href="images/Slot_Equipment_HelmetGloveBoots_BG.webp" width="90" height="90" x="345" y="367" class="gear-slot2"></image>
-          <image id="ring-left"  href="images/Slot_Equipment_Acc_BG.webp"             width="55" height="55" x="155" y="307" class="gear-slot2"></image>
-          <image id="ring-right" href="images/Slot_Equipment_Acc_BG.webp"             width="55" height="55" x="345" y="307" class="gear-slot2"></image>
-          <image id="necklace"   href="images/Slot_Equipment_Acc_BG.webp"             width="55" height="55" x="335" y="80"  class="gear-slot2"></image>
+          <image id="Primary"    href="images/Inventory_WeaponSet_BG.webp"             width="148" height="200" x="15"  y="5"   class="gear-slot2"/>
+          <image id="Secondary"  href="images/Inventory_WeaponSet_BG.webp"             width="148" height="200" x="400" y="5"   class="gear-slot2"/>
+          <image id="head"       href="images/Slot_Equipment_HelmetGloveBoots_BG.webp" width="90"  height="90"  x="235" y="50"  class="gear-slot2"/>
+          <image id="chest"      href="images/Slot_Equipment_ChestAndPants_BG.webp"    width="110" height="147" x="225" y="150" class="gear-slot2"/>
+          <image id="legs"       href="images/Slot_Equipment_ChestAndPants_BG.webp"    width="110" height="147" x="225" y="307" class="gear-slot2"/>
+          <image id="sash"       href="images/Slot_Equipment_HelmetGloveBoots_BG.webp" width="90"  height="90"  x="125" y="207" class="gear-slot2"/>
+          <image id="back"       href="images/Slot_Equipment_HelmetGloveBoots_BG.webp" width="90"  height="90"  x="345" y="207" class="gear-slot2"/>
+          <image id="hands"      href="images/Slot_Equipment_HelmetGloveBoots_BG.webp" width="90"  height="90"  x="125" y="367" class="gear-slot2"/>
+          <image id="foot"       href="images/Slot_Equipment_HelmetGloveBoots_BG.webp" width="90"  height="90"  x="345" y="367" class="gear-slot2"/>
+          <image id="ring-left"  href="images/Slot_Equipment_Acc_BG.webp"              width="55"  height="55"  x="155" y="307" class="gear-slot2"/>
+          <image id="ring-right" href="images/Slot_Equipment_Acc_BG.webp"              width="55"  height="55"  x="345" y="307" class="gear-slot2"/>
+          <image id="necklace"   href="images/Slot_Equipment_Acc_BG.webp"              width="55"  height="55"  x="335" y="80"  class="gear-slot2"/>
         </svg>
       </div>
     </section>
+  </div>
+
   </main>
 
-  <footer>
-    <div class="footer-content">
-      <p>DaDBuilds is a fan-made website created by the community and is in no way affiliated with or endorsed by IRONMACE. All intellectual property belongs solely to IRONMACE.</p>
-      <p>IRONMACE ™ and Dark and Darker ™ are trademarks of IRONMACE. Certain assets © IRONMACE. All rights reserved.</p>
-      <p>© 2025 DaDBuilds. All rights reserved.</p>
-      <div class="social-media">
-        <a href="#" target="_blank">Facebook</a>
-        <a href="#" target="_blank">Twitter</a>
-        <a href="#" target="_blank">Instagram</a>
+<footer>
+  <div class="footer-inner">
+  <div class="footer-content">
+    <p>DaDBuilds is a fan-made website not affiliated with or endorsed by IRONMACE.</p>
+    <p>IRONMACE™ and Dark and Darker™ are trademarks of IRONMACE. © IRONMACE. All rights reserved.</p>
+    <div class="slinks"><a href="#">Discord</a><a href="#">Reddit</a><a href="#">Twitter</a></div>
+  </div><!-- /footer-content -->
+  </div><!-- /footer-inner -->
+</footer>
+
+<div class="popup-overlay" id="popup-overlay" onclick="closePopup()"></div>
+<div class="popup" id="popup">
+  <div class="popup-tbar">
+    <div class="popup-tbar-l">
+      <div class="dot"></div>
+      <div>
+        <div class="popup-slot" id="popup-title">Select Item</div>
+        <div class="popup-meta" id="popup-subtitle"></div>
       </div>
     </div>
-  </footer>
-
-  <div class="popup-overlay" id="popup-overlay" onclick="closePopup()"></div>
-  <div class="popup" id="popup">
-    <h2 id="popup-title">Choose your gear</h2>
-    <p id="popup-text">Loading data...</p>
-    <div id="popup-items-container">
-      <ul id="popup-items"></ul>
-    </div>
-    <div class="pagination">
-      <button id="prev-page" onclick="changePage(-1)">← Prev</button>
-      <span id="page-info"></span>
-      <button id="next-page" onclick="changePage(1)">Next →</button>
-    </div>
-    <button onclick="closePopup()">Close</button>
+    <button class="popup-xbtn" onclick="closePopup()">✕</button>
   </div>
-
-  <div id="item-stats">
-    <h3>Item Stats</h3>
-    <table id="item-stats-table"></table>
+  <div class="popup-srow">
+    <span class="slabel">Filter:</span>
+    <input type="text" id="popup-search" placeholder="Item name..." oninput="filterItems(this.value)">
   </div>
+  <div id="popup-items-container">
+    <div id="popup-loading">Loading...</div>
+    <div id="popup-empty">No items found.</div>
+    <ul id="popup-items"></ul>
+  </div>
+  <div class="popup-foot">
+    <button class="pbtn" onclick="changePage(-1)">← Prev</button>
+    <span id="page-info">— / —</span>
+    <button class="pbtn" onclick="changePage(1)">Next →</button>
+    <button class="pclosebtn" onclick="closePopup()">Close</button>
+  </div>
+</div>
 
-  <script src="script.js"></script>
-  <script>
-    let currentSlot = "";
-    let currentPage = 1;
-    let totalPages = 1;
+<div id="item-stats">
+  <div class="ist-title">Item Stats</div>
+  <table id="item-stats-table"></table>
+</div>
+<div id="toast"></div>
 
-    document.querySelectorAll("image.gear-slot2").forEach(slot => {
-      slot.addEventListener("click", function() {
-        openPopup(this.id);
-      });
+<script src="script.js"></script>
+<script>
+  let currentSlot="", currentPage=1, totalPages=1, allItems=[], equippedItems={};
+
+  function setActiveClass(c){ document.querySelectorAll('.class-btn').forEach(b=>b.classList.toggle('active',b.dataset.class===c)); }
+
+  ['Fighter','Ranger','Cleric','Druid','Bard','Warlock','Sorcerer','Wizard','Rogue','Barbarian'].forEach(n=>{
+    const orig=window[n+'Start'];
+    window[n+'Start']=function(){
+      if(orig)orig();
+      setActiveClass(n.toLowerCase());
+
+    };
+  });
+
+  document.querySelectorAll('image.gear-slot2').forEach(s=>s.addEventListener('click',function(){ openPopup(this.id); }));
+
+  async function openPopup(slotId){
+    currentSlot=slotId; currentPage=1;
+    let apiSlot=(slotId==='ring-left'||slotId==='ring-right')?'ring':slotId;
+    const cc=classCodes[klass]||0;
+    document.getElementById('popup-title').innerText=slotId.replace(/-/g,' ').toUpperCase();
+    document.getElementById('popup-subtitle').innerText=`Class: ${klass||'—'}`;
+    document.getElementById('popup-items').innerHTML='';
+    document.getElementById('popup-loading').style.display='block';
+    document.getElementById('popup-empty').style.display='none';
+    document.getElementById('popup-search').value='';
+    document.getElementById('popup').classList.add('open');
+    document.getElementById('popup-overlay').style.display='block';
+    await fetchItems(apiSlot,cc);
+  }
+
+  async function fetchItems(slotType,cc){
+    try{
+      const res=await fetch(`/api/items?slot_type=${slotType}&required_class=${cc}&page=${currentPage}`);
+      if(!res.ok) throw new Error(res.status);
+      const data=await res.json();
+      document.getElementById('popup-loading').style.display='none';
+      allItems=data.body||[];
+      renderItems(allItems);
+      totalPages=data.pagination?.num_pages||1;
+      document.getElementById('page-info').innerText=`${currentPage} / ${totalPages}`;
+      document.getElementById('popup-subtitle').innerText=`${allItems.length} items · Page ${currentPage}/${totalPages}`;
+    }catch(e){ document.getElementById('popup-loading').innerText='Failed to load.'; }
+  }
+
+  const RC={poor:'#6a6460',common:'#c8c0b0',uncommon:'#508050',rare:'#4878a8',epic:'#8858a8',legendary:'#e8a050'};
+
+  function renderItems(items){
+    const ul=document.getElementById('popup-items'), em=document.getElementById('popup-empty');
+    ul.innerHTML='';
+    if(!items?.length){ em.style.display='block'; return; }
+    em.style.display='none';
+    items.forEach(item=>{
+      const li=document.createElement('li');
+      const r=(item.rarity||'common').toLowerCase(), c=RC[r]||'#c8c0b0';
+      li.innerHTML=`<span class="idot" style="background:${c};box-shadow:0 0 3px ${c}55;"></span><span class="rarity-${r}">${item.name}</span><span class="itype">${item.type||''}</span>`;
+      li.addEventListener('mouseover',()=>showStats(item));
+      li.addEventListener('mouseout',hideStats);
+      li.addEventListener('click',()=>applyItemToGearSlot(item));
+      ul.appendChild(li);
     });
+  }
 
-    async function openPopup(slotId) {
-      currentSlot = slotId;
-      currentPage = 1;
-      let apiSlot = (slotId === "ring-left" || slotId === "ring-right") ? "ring" : slotId;
-      const classCode = classCodes[klass] || 0;
-      document.getElementById("popup-title").innerText = "Select: " + currentSlot;
-      document.getElementById("popup-text").innerText = "Loading...";
-      document.getElementById("popup-items").innerHTML = "";
-      document.getElementById("popup").style.display = "block";
-      document.getElementById("popup-overlay").style.display = "block";
-      fetchItems(apiSlot, classCode);
+  function filterItems(q){ renderItems(q?allItems.filter(i=>i.name.toLowerCase().includes(q.toLowerCase())):allItems); }
+
+  function showStats(item){
+    const tbl=document.getElementById('item-stats-table'); tbl.innerHTML='';
+    const keys=['primary_min_physical_power','primary_min_armor_rating','primary_min_magic_resistance','primary_min_max_health','primary_min_action_speed','primary_min_move_speed','primary_min_strength','primary_min_vigor','primary_min_agility','primary_min_dexterity','primary_min_will','primary_min_knowledge','primary_min_physical_damage_reduction','secondary_min_magical_damage_reduction','primary_min_magical_power','primary_min_regular_interaction_speed','secondary_min_resourcefulness'];
+    let has=false;
+    keys.forEach(k=>{ if(item[k]){ has=true; const r=document.createElement('tr'); r.innerHTML=`<td>${k.replace(/primary_min_|secondary_min_/g,'').replace(/_/g,' ')}</td><td>+${item[k]}</td>`; tbl.appendChild(r); } });
+    if(has) document.getElementById('item-stats').style.display='block';
+  }
+  function hideStats(){ document.getElementById('item-stats').style.display='none'; }
+
+  function changePage(d){
+    const np=currentPage+d; if(np<1||np>totalPages) return;
+    currentPage=np;
+    let apiSlot=(currentSlot==='ring-left'||currentSlot==='ring-right')?'ring':currentSlot;
+    document.getElementById('popup-loading').style.display='block';
+    document.getElementById('popup-items').innerHTML='';
+    fetchItems(apiSlot,classCodes[klass]||0);
+  }
+
+  function closePopup(){
+    document.getElementById('popup').classList.remove('open');
+    document.getElementById('popup-overlay').style.display='none';
+    document.getElementById('popup-items').innerHTML='';
+    hideStats();
+  }
+
+  function applyItemToGearSlot(item){
+    const slot=document.getElementById(currentSlot); if(!slot) return;
+    const sw=document.getElementById('svg-wrapper');
+    const scale=sw.querySelector('svg').getBoundingClientRect().width/560;
+    const x=+slot.getAttribute('x'),y=+slot.getAttribute('y'),w=+slot.getAttribute('width'),h=+slot.getAttribute('height');
+    const sf=({dagger:.5,rapier:.6,'short sword':.65,sword:.7,longsword:.8,axe:.75,'battle axe':.75,mace:.75,staff:.8,bow:.75,crossbow:.75}[(item.type||'').toLowerCase()]||.85);
+    const nw=w*sf,nh=h*sf;
+    const ex=document.querySelector(`img.item-icon[data-slot='${currentSlot}']`); if(ex) ex.remove();
+    const img=document.createElement('img');
+    img.src=`https://api.darkerdb.com/v1/items/${item.id}/icon`;
+    img.alt=item.name; img.title=item.name; img.className='item-icon'; img.dataset.slot=currentSlot;
+    img.style.cssText=`position:absolute;left:${(x+(w-nw)/2)*scale}px;top:${(y+(h-nh)/2)*scale}px;width:${nw*scale}px;height:${nh*scale}px;pointer-events:none;object-fit:contain;`;
+    sw.appendChild(img);
+    equippedItems[currentSlot]={id:item.id,name:item.name};
+    applyItemStatsMapped(item); closePopup();
+  }
+
+  function applyItemStatsMapped(item){
+    const map={"primary_min_action_speed":"action_speed","primary_min_agility":"agility","primary_min_armor_rating":"armor_rating","primary_min_additional_armor_rating":"armor_rating","primary_min_dexterity":"dexterity","primary_min_knowledge":"knowledge","primary_min_strength":"strength","primary_min_vigor":"vigor","primary_min_will":"will","secondary_min_resourcefulness":"resourcefulness","primary_min_magic_resistance":"magic_resistance","primary_min_max_health":"max_health","primary_min_physical_damage_reduction":"physical_damage_reduction","secondary_min_magical_damage_reduction":"magical_damage_reduction","secondary_min_physical_power":"physical_power","primary_min_magical_power":"magical_power","primary_min_move_speed":"movement_speed","primary_min_move_speed_bonus":"move_speed_bonus","primary_min_regular_interaction_speed":"regular_interaction_speed"};
+    for(const[k,id]of Object.entries(map)){
+      const v=item[k],el=document.getElementById(id);
+      if(el&&v!=null&&!isNaN(v)) el.innerText=(parseFloat(el.innerText)||0+v).toFixed(1);
     }
+    updateAllStats();
+  }
 
-    // ✅ Volá cez Vercel serverless proxy — žiadny CORS problém
-    async function fetchItems(slotType, requiredClassCode) {
-      const apiUrl = `/api/items?slot_type=${slotType}&required_class=${requiredClassCode}&page=${currentPage}`;
-      try {
-        const response = await fetch(apiUrl);
-        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-        const data = await response.json();
-        const itemList = document.getElementById("popup-items");
-        itemList.innerHTML = "";
+  function showToast(msg){ const t=document.getElementById('toast'); t.innerText=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
 
-        if (!data.body || data.body.length === 0) {
-          document.getElementById("popup-text").innerText = "No items found.";
-        } else {
-          document.getElementById("popup-text").innerText = "";
-          data.body.forEach(item => {
-            let li = document.createElement("li");
-            li.innerText = item.name;
-            li.classList.add(`rarity-${item.rarity.toLowerCase()}`);
-            li.addEventListener("mouseover", () => showStats(item));
-            li.addEventListener("mouseout", hideStats);
-            li.addEventListener("click", () => applyItemToGearSlot(item));
-            itemList.appendChild(li);
-          });
-        }
+  function saveBuild(){
+    const name=document.getElementById('build-name-input').value.trim();
+    if(!name){ showToast('Enter a build name!'); return; }
+    if(!klass){ showToast('Select a class first!'); return; }
+    const builds=JSON.parse(localStorage.getItem('dadBuilds')||'[]');
+    const build={id:Date.now(),name,class:klass,items:{...equippedItems},date:new Date().toLocaleDateString()};
+    const ei=builds.findIndex(b=>b.name===name);
+    if(ei>=0) builds[ei]=build; else builds.unshift(build);
+    localStorage.setItem('dadBuilds',JSON.stringify(builds.slice(0,20)));
+    renderSavedBuilds(); showToast(`"${name}" saved`);
+  }
 
-        totalPages = data.pagination?.num_pages || 1;
-        document.getElementById("page-info").innerText = `${currentPage} / ${totalPages}`;
-      } catch (error) {
-        console.error("Error:", error);
-        document.getElementById("popup-text").innerText = "Failed to load. Check console.";
-      }
-    }
+  function loadBuild(build){
+    const map={fighter:FighterStart,ranger:RangerStart,cleric:ClericStart,druid:DruidStart,bard:BardStart,warlock:WarlockStart,sorcerer:SorcererStart,wizard:WizardStart,rogue:RogueStart,barbarian:BarbarianStart};
+    if(map[build.class]) map[build.class]();
+    showToast(`"${build.name}" loaded`);
+  }
 
-    function showStats(item) {
-      const statsContainer = document.getElementById("item-stats");
-      const statsTable = document.getElementById("item-stats-table");
-      statsTable.innerHTML = '';
-      const relevantStats = [
-        'primary_min_physical_power','primary_min_armor_rating','primary_min_magic_resistance',
-        'primary_min_max_health','primary_min_action_speed','primary_min_move_speed',
-        'primary_min_strength','primary_min_vigor','primary_min_agility',
-        'primary_min_dexterity','primary_min_will','primary_min_knowledge',
-        'primary_min_physical_damage_reduction','secondary_min_magical_damage_reduction',
-        'primary_min_magical_power','primary_min_regular_interaction_speed','secondary_min_resourcefulness'
-      ];
-      relevantStats.forEach(key => {
-        if (item[key]) {
-          const row = document.createElement('tr');
-          row.innerHTML = `<td>${key.replace(/_/g," ").replace("primary min ","").replace("secondary min ","")}</td><td>${item[key]}</td>`;
-          statsTable.appendChild(row);
-        }
-      });
-      statsContainer.style.display = "block";
-    }
+  function deleteBuild(id){
+    const builds=JSON.parse(localStorage.getItem('dadBuilds')||'[]');
+    localStorage.setItem('dadBuilds',JSON.stringify(builds.filter(b=>b.id!==id)));
+    renderSavedBuilds();
+  }
 
-    function hideStats() {
-      document.getElementById("item-stats").style.display = "none";
-    }
+  function clearBuild(){
+    document.querySelectorAll('img.item-icon').forEach(i=>i.remove()); equippedItems={};
+    const map={fighter:FighterStart,ranger:RangerStart,cleric:ClericStart,druid:DruidStart,bard:BardStart,warlock:WarlockStart,sorcerer:SorcererStart,wizard:WizardStart,rogue:RogueStart,barbarian:BarbarianStart};
+    if(klass&&map[klass]) map[klass](); showToast('Build cleared');
+  }
 
-    function changePage(direction) {
-      const newPage = currentPage + direction;
-      if (newPage >= 1 && newPage <= totalPages) {
-        currentPage = newPage;
-        let apiSlot = (currentSlot === "ring-left" || currentSlot === "ring-right") ? "ring" : currentSlot;
-        fetchItems(apiSlot, classCodes[klass] || 0);
-      }
-    }
+  function renderSavedBuilds(){
+    const builds=JSON.parse(localStorage.getItem('dadBuilds')||'[]');
+    const c=document.getElementById('saved-builds-list');
+    if(!builds.length){ c.innerHTML='<div class="builds-empty">No saved builds</div>'; return; }
+    c.innerHTML=builds.map(b=>`<div class="sbi" onclick="loadBuild(${JSON.stringify(b).replace(/"/g,'&quot;')})"><div><div class="sbi-name">${b.name}</div><div class="sbi-meta">${b.class} · ${b.date}</div></div><span class="sbi-del" onclick="event.stopPropagation();deleteBuild(${b.id})">✕</span></div>`).join('');
+  }
 
-    function closePopup() {
-      document.getElementById("popup").style.display = "none";
-      document.getElementById("popup-overlay").style.display = "none";
-      document.getElementById("popup-items").innerHTML = "";
-      document.getElementById("item-stats").style.display = "none";
-    }
+  window.addEventListener('resize',()=>document.querySelectorAll('img.item-icon').forEach(i=>i.remove()));
+  window.addEventListener('load',()=>{ FighterStart(); renderSavedBuilds(); });
 
-    function applyItemToGearSlot(item) {
-      const slot = document.getElementById(currentSlot);
-      if (!slot) return;
-
-      const iconUrl = `https://api.darkerdb.com/v1/items/${item.id}/icon`;
-      const svgWrapper = document.getElementById('svg-wrapper');
-      const svgEl = svgWrapper.querySelector('svg');
-      const svgRect = svgEl.getBoundingClientRect();
-      const viewBoxWidth = 560;
-
-      const scale = svgRect.width / viewBoxWidth;
-
-      const x = parseFloat(slot.getAttribute('x'));
-      const y = parseFloat(slot.getAttribute('y'));
-      const w = parseFloat(slot.getAttribute('width'));
-      const h = parseFloat(slot.getAttribute('height'));
-
-      const itemScales = { dagger:0.5, rapier:0.6, "short sword":0.65, sword:0.7, longsword:0.8, axe:0.75, "battle axe":0.75, mace:0.75, staff:0.8, bow:0.75, crossbow:0.75 };
-      const sf = itemScales[(item.type||"").toLowerCase()] || 0.85;
-
-      const nw = w * sf, nh = h * sf;
-
-      const existing = document.querySelector(`img.item-icon[data-slot='${currentSlot}']`);
-      if (existing) existing.remove();
-
-      const img = document.createElement('img');
-      img.src = iconUrl;
-      img.alt = item.name;
-      img.title = item.name;
-      img.classList.add('item-icon');
-      img.dataset.slot = currentSlot;
-      img.style.position = 'absolute';
-      img.style.left = `${(x + (w - nw) / 2) * scale}px`;
-      img.style.top  = `${(y + (h - nh) / 2) * scale}px`;
-      img.style.width  = `${nw * scale}px`;
-      img.style.height = `${nh * scale}px`;
-      img.style.pointerEvents = 'none';
-      img.style.objectFit = 'contain';
-
-      svgWrapper.appendChild(img);
-      applyItemStatsMapped(item);
-      closePopup();
-    }
-
-    function applyItemStatsMapped(item) {
-      const statMap = {
-        "primary_min_action_speed":"action_speed","primary_min_agility":"agility",
-        "primary_min_armor_rating":"armor_rating","primary_min_additional_armor_rating":"armor_rating",
-        "primary_min_dexterity":"dexterity","primary_min_knowledge":"knowledge",
-        "primary_min_strength":"strength","primary_min_vigor":"vigor",
-        "primary_min_will":"will","secondary_min_resourcefulness":"resourcefulness",
-        "primary_min_magic_resistance":"magic_resistance","primary_min_max_health":"max_health",
-        "primary_min_physical_damage_reduction":"physical_damage_reduction",
-        "secondary_min_magical_damage_reduction":"magical_damage_reduction",
-        "secondary_min_physical_power":"physical_power","primary_min_magical_power":"magical_power",
-        "primary_min_move_speed":"movement_speed","primary_min_move_speed_bonus":"move_speed_bonus",
-        "primary_min_regular_interaction_speed":"regular_interaction_speed"
-      };
-      for (const [apiKey, statId] of Object.entries(statMap)) {
-        const value = item[apiKey];
-        const cell = document.getElementById(statId);
-        if (cell && value != null && !isNaN(value)) {
-          const current = parseFloat(cell.innerText) || 0;
-          cell.innerText = (current + value).toFixed(1);
-        }
-      }
-      updateAllStats();
-    }
-
-    // Reposition item icons on window resize
-    window.addEventListener('resize', () => {
-      document.querySelectorAll('img.item-icon').forEach(img => img.remove());
-    });
-  </script>
+</script>
 </body>
 </html>
